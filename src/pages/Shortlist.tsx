@@ -1,7 +1,9 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, GitCompare, Droplets } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, GitCompare, Droplets, Loader2, ImageIcon } from 'lucide-react'
 import { useAppContext } from '../App'
 import { ScoredColor } from '../types'
+import { generateRoomVisualization, getCacheKey, getCachedVisualization, cacheVisualization } from '../utils/gemini'
 
 const tagLabels: Record<string, { label: string; bg: string; text: string }> = {
   safe_win: { label: 'Safe Win', bg: 'bg-emerald-50', text: 'text-emerald-700' },
@@ -9,10 +11,38 @@ const tagLabels: Record<string, { label: string; bg: string; text: string }> = {
   wildcard: { label: 'Wildcard', bg: 'bg-amber-50', text: 'text-amber-700' }
 }
 
-function ColorCard({ scored, onCompare }: { scored: ScoredColor; onCompare: () => void }) {
+function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCompare: () => void; roomImage: string | null }) {
   const navigate = useNavigate()
   const { color, tag, scores, reasoning, suggestedTrim, suggestedFinish } = scored
   const tagInfo = tagLabels[tag]
+  const [visualizedImage, setVisualizedImage] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [showVisualized, setShowVisualized] = useState(true)
+
+  useEffect(() => {
+    if (!roomImage) return
+
+    const cacheKey = getCacheKey(roomImage, color.id)
+    const cached = getCachedVisualization(cacheKey)
+
+    if (cached) {
+      setVisualizedImage(cached)
+      return
+    }
+
+    // Auto-generate visualization when room image is available
+    const generateVisualization = async () => {
+      setIsGenerating(true)
+      const result = await generateRoomVisualization(roomImage, { name: color.name, hex: color.hex })
+      if (result.success && result.imageUrl) {
+        setVisualizedImage(result.imageUrl)
+        cacheVisualization(cacheKey, result.imageUrl)
+      }
+      setIsGenerating(false)
+    }
+
+    generateVisualization()
+  }, [roomImage, color.id, color.name, color.hex])
 
   const undertoneText = () => {
     const temp = color.undertone.temperature === 'neutral' ? '' : `${color.undertone.temperature} `
@@ -22,14 +52,45 @@ function ColorCard({ scored, onCompare }: { scored: ScoredColor; onCompare: () =
 
   return (
     <div className="card overflow-hidden">
-      {/* Swatch */}
-      <div
-        className="h-32 relative"
-        style={{ backgroundColor: color.hex }}
-      >
+      {/* Swatch / Visualization */}
+      <div className="h-48 relative">
+        {/* Show visualized image if available, otherwise show color swatch */}
+        {visualizedImage && showVisualized ? (
+          <img
+            src={visualizedImage}
+            alt={`Room with ${color.name}`}
+            className="w-full h-full object-cover"
+          />
+        ) : isGenerating ? (
+          <div
+            className="w-full h-full flex flex-col items-center justify-center"
+            style={{ backgroundColor: color.hex }}
+          >
+            <Loader2 className="w-8 h-8 text-white/80 animate-spin mb-2" />
+            <span className="text-white/80 text-sm">Visualizing...</span>
+          </div>
+        ) : (
+          <div
+            className="w-full h-full"
+            style={{ backgroundColor: color.hex }}
+          />
+        )}
+
+        {/* Tag badge */}
         <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium ${tagInfo.bg} ${tagInfo.text}`}>
           {tagInfo.label}
         </div>
+
+        {/* Toggle button when visualization exists */}
+        {visualizedImage && (
+          <button
+            onClick={() => setShowVisualized(!showVisualized)}
+            className="absolute top-3 right-3 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+            title={showVisualized ? 'Show color swatch' : 'Show room visualization'}
+          >
+            <ImageIcon className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Content */}
@@ -114,7 +175,7 @@ function ColorCard({ scored, onCompare }: { scored: ScoredColor; onCompare: () =
 
 export default function Shortlist() {
   const navigate = useNavigate()
-  const { shortlist, profile, setCompareColors, compareColors } = useAppContext()
+  const { shortlist, profile, setCompareColors, compareColors, roomImage } = useAppContext()
 
   if (!profile || shortlist.length === 0) {
     return (
@@ -179,6 +240,15 @@ export default function Shortlist() {
         </p>
       </div>
 
+      {/* Room image indicator */}
+      {roomImage && (
+        <div className="px-4 py-3 bg-emerald-50 text-center">
+          <p className="text-xs text-emerald-700">
+            ✨ AI is visualizing each color on your room photo
+          </p>
+        </div>
+      )}
+
       {/* Color Cards */}
       <div className="p-4 space-y-4">
         {shortlist.map(scored => (
@@ -186,6 +256,7 @@ export default function Shortlist() {
             key={scored.color.id}
             scored={scored}
             onCompare={() => handleCompare(scored)}
+            roomImage={roomImage}
           />
         ))}
       </div>

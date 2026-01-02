@@ -22,6 +22,8 @@ interface AppContextType {
   addToShoppingList: (item: ShoppingListItem) => void
   removeFromShoppingList: (id: string) => void
   clearShoppingList: () => void
+  roomImage: string | null
+  setRoomImage: (img: string | null) => void
 }
 
 export const AppContext = createContext<AppContextType | null>(null)
@@ -37,6 +39,7 @@ function App() {
   const [shortlist, setShortlist] = useState<ScoredColor[]>([])
   const [compareColors, setCompareColors] = useState<[ScoredColor | null, ScoredColor | null]>([null, null])
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([])
+  const [roomImage, setRoomImage] = useState<string | null>(null)
 
   const addToShoppingList = (item: ShoppingListItem) => {
     setShoppingList(prev => [...prev.filter(i => i.id !== item.id), item])
@@ -62,7 +65,9 @@ function App() {
         shoppingList,
         addToShoppingList,
         removeFromShoppingList,
-        clearShoppingList
+        clearShoppingList,
+        roomImage,
+        setRoomImage
       }}
     >
       <BrowserRouter basename="/thecoloredit">

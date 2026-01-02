@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Check, Sparkles } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Sparkles, Upload, Camera, X } from 'lucide-react'
 import { useAppContext } from '../App'
 import { buildShortlist } from '../utils/recommendation'
 import { UserRoomProfile } from '../types'
@@ -9,7 +9,7 @@ type Step = {
   id: string
   title: string
   subtitle?: string
-  type: 'single' | 'multi' | 'slider'
+  type: 'single' | 'multi' | 'slider' | 'image'
   options?: Array<{ label: string; value: string }>
   sliders?: Array<{ label: string; left: string; right: string; key: string }>
 }
@@ -66,25 +66,10 @@ const steps: Step[] = [
     ]
   },
   {
-    id: 'fixedElements',
-    title: "What's staying in the room?",
-    subtitle: 'Select all that apply. This helps us avoid clashing.',
-    type: 'multi',
-    options: [
-      { label: 'Warm wood floors', value: 'wood_warm' },
-      { label: 'Cool wood floors', value: 'wood_cool' },
-      { label: 'White cabinets', value: 'cabinets_white' },
-      { label: 'Cream cabinets', value: 'cabinets_cream' },
-      { label: 'Gray cabinets', value: 'cabinets_gray' },
-      { label: 'White/marble counters', value: 'counters_white' },
-      { label: 'Warm counters', value: 'counters_warm' },
-      { label: 'Dark counters', value: 'counters_dark' },
-      { label: 'Red brick', value: 'brick_red' },
-      { label: 'Gray brick', value: 'brick_gray' },
-      { label: 'Brass / gold hardware', value: 'hardware_brass' },
-      { label: 'Chrome / nickel', value: 'hardware_chrome' },
-      { label: 'Black hardware', value: 'hardware_black' }
-    ]
+    id: 'roomImage',
+    title: 'Show us your room',
+    subtitle: "Upload a photo and we'll visualize each color on your walls.",
+    type: 'image'
   },
   {
     id: 'vibe',
@@ -137,22 +122,47 @@ const steps: Step[] = [
 
 export default function RoomSetup() {
   const navigate = useNavigate()
-  const { setProfile, setShortlist } = useAppContext()
+  const { setProfile, setShortlist, setRoomImage } = useAppContext()
   const [currentStep, setCurrentStep] = useState(0)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [answers, setAnswers] = useState<Record<string, string | string[] | number>>({
     roomType: '',
     lightDirection: '',
     primaryUsage: '',
     bulbTemp: '',
-    fixedElements: [],
+    roomImage: '',
     cozyToCrisp: 50,
     calmToMoody: 50,
     undertoneFears: [],
     brandPreferences: [],
     depthPreference: ''
   })
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result as string
+        setImagePreview(base64)
+        setAnswers(prev => ({ ...prev, roomImage: base64 }))
+        setRoomImage(base64)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = () => {
+    setImagePreview(null)
+    setAnswers(prev => ({ ...prev, roomImage: '' }))
+    setRoomImage(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   const step = steps[currentStep]
   const isLastStep = currentStep === steps.length - 1
@@ -197,7 +207,7 @@ export default function RoomSetup() {
         primaryUsage: answers.primaryUsage as UserRoomProfile['lighting']['primaryUsage'],
         bulbTemp: answers.bulbTemp as UserRoomProfile['lighting']['bulbTemp']
       },
-      fixedElements: answers.fixedElements as string[],
+      fixedElements: [], // No longer collected via form
       vibe: {
         cozyToCrisp: answers.cozyToCrisp as number,
         calmToMoody: answers.calmToMoody as number
@@ -250,9 +260,9 @@ export default function RoomSetup() {
       </header>
 
       {/* Content */}
-      <div className="flex-1 px-6 pt-6 pb-8 flex flex-col">
+      <div className="px-6 pt-6 pb-4 flex flex-col">
         {/* Question */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h2 className="font-serif text-2xl text-charcoal mb-2">
             {step.title}
           </h2>
@@ -264,7 +274,7 @@ export default function RoomSetup() {
         </div>
 
         {/* Options */}
-        <div className="flex-1">
+        <div className="mb-8">
           {step.type === 'single' && step.options && (
             <div className="flex flex-wrap gap-3">
               {step.options.map(opt => (
@@ -324,6 +334,57 @@ export default function RoomSetup() {
               ))}
             </div>
           )}
+
+          {step.type === 'image' && (
+            <div className="space-y-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+                id="room-image-upload"
+              />
+
+              {!imagePreview ? (
+                <div className="space-y-3">
+                  <label
+                    htmlFor="room-image-upload"
+                    className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed border-charcoal/20 rounded-2xl cursor-pointer hover:border-charcoal/40 hover:bg-cream-100 transition-colors"
+                  >
+                    <Upload className="w-10 h-10 text-charcoal/40 mb-3" />
+                    <span className="text-charcoal font-medium">Upload a photo</span>
+                    <span className="text-charcoal-light text-sm mt-1">or drag and drop</span>
+                  </label>
+
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full py-3 px-4 border border-charcoal/20 rounded-full flex items-center justify-center gap-2 text-charcoal hover:bg-cream-100 transition-colors"
+                  >
+                    <Camera className="w-5 h-5" />
+                    Take a photo
+                  </button>
+                </div>
+              ) : (
+                <div className="relative">
+                  <img
+                    src={imagePreview}
+                    alt="Room preview"
+                    className="w-full h-64 object-cover rounded-2xl"
+                  />
+                  <button
+                    onClick={removeImage}
+                    className="absolute top-3 right-3 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                  <p className="text-center text-charcoal-light text-sm mt-3">
+                    Looking good! We'll show your colors on these walls.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -347,12 +408,12 @@ export default function RoomSetup() {
               </>
             )}
           </button>
-        ) : step.type === 'multi' || step.type === 'slider' ? (
+        ) : step.type === 'multi' || step.type === 'slider' || step.type === 'image' ? (
           <button
             onClick={() => setCurrentStep(prev => prev + 1)}
             className="btn-primary flex items-center justify-center gap-2"
           >
-            Continue
+            {step.type === 'image' && imagePreview ? 'Looks great!' : 'Continue'}
             <ArrowRight className="w-4 h-4" />
           </button>
         ) : null}
@@ -365,7 +426,16 @@ export default function RoomSetup() {
             }}
             className="mt-3 w-full py-2 text-sm text-charcoal-light hover:text-charcoal transition-colors"
           >
-            {step.id === 'undertoneFears' ? 'No concerns' : step.id === 'fixedElements' ? 'None of these' : 'Skip'}
+            {step.id === 'undertoneFears' ? 'No concerns' : 'Skip'}
+          </button>
+        )}
+
+        {step.type === 'image' && !imagePreview && (
+          <button
+            onClick={() => setCurrentStep(prev => prev + 1)}
+            className="mt-3 w-full py-2 text-sm text-charcoal-light hover:text-charcoal transition-colors"
+          >
+            Skip for now
           </button>
         )}
       </div>
