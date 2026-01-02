@@ -1,5 +1,6 @@
 // Room visualization using Gemini 2.5 Flash Image (Nano Banana)
 // Edits the user's actual room photo to show different paint colors
+// Triggered rebuild for API key
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || ''
 
