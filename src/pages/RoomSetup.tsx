@@ -347,7 +347,7 @@ export default function RoomSetup() {
               </>
             )}
           </button>
-        ) : step.type === 'multi' ? (
+        ) : step.type === 'multi' || step.type === 'slider' ? (
           <button
             onClick={() => setCurrentStep(prev => prev + 1)}
             className="btn-primary flex items-center justify-center gap-2"
