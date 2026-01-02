@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-cream-50 text-charcoal font-sans;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply w-full py-4 px-6 bg-charcoal text-cream-50 font-medium text-base rounded-full
+           transition-all duration-200 ease-out
+           hover:bg-charcoal-light active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply w-full py-3 px-5 border border-charcoal/20 text-charcoal font-medium text-sm rounded-full
+           transition-all duration-200 ease-out
+           hover:border-charcoal/40 hover:bg-cream-100 active:scale-[0.98];
+  }
+
+  .btn-pill {
+    @apply py-2.5 px-5 border border-charcoal/15 text-charcoal text-sm rounded-full
+           transition-all duration-200 ease-out cursor-pointer
+           hover:border-charcoal/30 hover:bg-cream-100;
+  }
+
+  .btn-pill-selected {
+    @apply py-2.5 px-5 bg-charcoal text-cream-50 text-sm rounded-full
+           transition-all duration-200 ease-out cursor-pointer;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-2 py-2 px-4 border border-charcoal/15 text-charcoal text-sm rounded-full
+           transition-all duration-200 ease-out cursor-pointer
+           hover:border-charcoal/30 hover:bg-cream-100;
+  }
+
+  .chip-selected {
+    @apply inline-flex items-center gap-2 py-2 px-4 bg-charcoal text-cream-50 text-sm rounded-full
+           transition-all duration-200 ease-out cursor-pointer;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-charcoal/5 overflow-hidden;
+  }
+
+  .card-elevated {
+    @apply bg-white rounded-2xl shadow-md border border-charcoal/5 overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .safe-area-inset-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+
+  .safe-area-inset-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(44, 44, 44, 0.2);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(44, 44, 44, 0.3);
+}
+
+/* Hide scrollbar for mobile */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
