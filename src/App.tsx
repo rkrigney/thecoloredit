@@ -65,7 +65,7 @@ function App() {
         clearShoppingList
       }}
     >
-      <BrowserRouter>
+      <BrowserRouter basename="/thecoloredit">
         <div className="min-h-screen bg-cream-50">
           <Routes>
             <Route path="/" element={<Home />} />
