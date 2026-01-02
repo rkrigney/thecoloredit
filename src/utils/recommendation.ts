@@ -194,11 +194,11 @@ function computeOverallScore(
   profile: UserRoomProfile
 ): ScoredColor['scores'] {
   const weights = {
-    vibe: 0.30,
-    lighting: 0.25,
-    undertone: 0.25,
-    depth: 0.15,
-    trend: 0.05
+    vibe: 0.25,
+    lighting: 0.20,
+    undertone: 0.20,
+    depth: 0.10,
+    trend: 0.25
   }
 
   const vibeMatch = computeVibeMatch(color, profile.vibe)
