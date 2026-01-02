@@ -62,7 +62,7 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
   return (
     <div className="card overflow-hidden">
       {/* Swatch / Visualization */}
-      <div className="h-48 relative overflow-hidden">
+      <div className="aspect-[4/3] relative overflow-hidden">
         {/* Show visualized image if available, otherwise show color swatch */}
         {visualizedImage && showVisualized ? (
           <img
@@ -127,10 +127,18 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
 
       {/* Content */}
       <div className="p-4">
-        {/* Name & Code */}
-        <div className="mb-3">
-          <h3 className="font-serif text-lg text-charcoal">{color.name}</h3>
-          <p className="text-sm text-charcoal-light">{color.brand} {color.code}</p>
+        {/* Name, Code & Swatch */}
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h3 className="font-serif text-lg text-charcoal">{color.name}</h3>
+            <p className="text-sm text-charcoal-light">{color.brand} {color.code}</p>
+          </div>
+          {/* Color swatch */}
+          <div
+            className="w-12 h-12 rounded-lg shadow-md border border-charcoal/10 flex-shrink-0"
+            style={{ backgroundColor: color.hex }}
+            title={`${color.name} - ${color.hex}`}
+          />
         </div>
 
         {/* Undertone & LRV */}
