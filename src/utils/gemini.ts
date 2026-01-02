@@ -14,7 +14,7 @@ export async function generateRoomVisualization(
   paintColor: { name: string; hex: string }
 ): Promise<GenerateImageResponse> {
   if (!GEMINI_API_KEY) {
-    console.warn('Gemini API key not configured')
+    console.warn('[Gemini] API key not configured - check VITE_GEMINI_API_KEY in .env')
     return { success: false, error: 'API key not configured' }
   }
 
@@ -22,11 +22,35 @@ export async function generateRoomVisualization(
     // Remove the data URL prefix if present
     const base64Data = roomImageBase64.replace(/^data:image\/\w+;base64,/, '')
 
-    const prompt = `Edit this room image to change the wall color to ${paintColor.name} (${paintColor.hex}).
-Keep all furniture, fixtures, and other elements exactly the same.
+    console.log(`[Gemini] Preparing request for ${paintColor.name}`)
+    console.log(`[Gemini] Image data length: ${base64Data.length} chars`)
+
+    const prompt = `Edit this room image to change the wall color to ${paintColor.name} (hex: ${paintColor.hex}).
+Keep all furniture, fixtures, decor, and other elements exactly the same.
 Only change the paint color on the walls to the specified color.
 Maintain the same lighting, shadows, and reflections but adjusted for the new wall color.
-The result should look like a realistic photograph of the same room with freshly painted walls.`
+The result should look like a realistic photograph of the same room with freshly painted walls in ${paintColor.name}.`
+
+    const requestBody = {
+      contents: [
+        {
+          parts: [
+            { text: prompt },
+            {
+              inlineData: {
+                mimeType: 'image/jpeg',
+                data: base64Data
+              }
+            }
+          ]
+        }
+      ],
+      generationConfig: {
+        responseModalities: ['image', 'text']
+      }
+    }
+
+    console.log('[Gemini] Sending request to API...')
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
@@ -35,49 +59,47 @@ The result should look like a realistic photograph of the same room with freshly
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { text: prompt },
-                {
-                  inlineData: {
-                    mimeType: 'image/jpeg',
-                    data: base64Data
-                  }
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            responseModalities: ['image', 'text'],
-            responseMimeType: 'image/jpeg'
-          }
-        })
+        body: JSON.stringify(requestBody)
       }
     )
 
+    console.log(`[Gemini] Response status: ${response.status}`)
+
     if (!response.ok) {
       const errorData = await response.json()
-      console.error('Gemini API error:', errorData)
-      return { success: false, error: errorData.error?.message || 'API request failed' }
+      console.error('[Gemini] API error response:', JSON.stringify(errorData, null, 2))
+      return { success: false, error: errorData.error?.message || `API request failed (${response.status})` }
     }
 
     const data = await response.json()
+    console.log('[Gemini] Response received, parsing...')
 
     // Extract the generated image from the response
     const imagePart = data.candidates?.[0]?.content?.parts?.find(
-      (part: { inlineData?: { data: string } }) => part.inlineData
+      (part: { inlineData?: { data: string; mimeType?: string } }) => part.inlineData
     )
 
     if (imagePart?.inlineData?.data) {
-      const imageUrl = `data:image/jpeg;base64,${imagePart.inlineData.data}`
+      const mimeType = imagePart.inlineData.mimeType || 'image/png'
+      const imageUrl = `data:${mimeType};base64,${imagePart.inlineData.data}`
+      console.log(`[Gemini] Successfully generated image (${mimeType})`)
       return { success: true, imageUrl }
     }
 
-    return { success: false, error: 'No image generated' }
+    // Log the response structure if no image found
+    console.error('[Gemini] No image in response. Response structure:', JSON.stringify(data, null, 2))
+
+    // Check if there's text content explaining why
+    const textPart = data.candidates?.[0]?.content?.parts?.find(
+      (part: { text?: string }) => part.text
+    )
+    if (textPart?.text) {
+      console.log('[Gemini] Text response:', textPart.text)
+    }
+
+    return { success: false, error: 'No image generated - model may not support image output' }
   } catch (error) {
-    console.error('Error generating room visualization:', error)
+    console.error('[Gemini] Error generating room visualization:', error)
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
   }
 }

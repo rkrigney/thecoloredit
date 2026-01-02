@@ -17,6 +17,7 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
   const tagInfo = tagLabels[tag]
   const [visualizedImage, setVisualizedImage] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [generationError, setGenerationError] = useState<string | null>(null)
   const [showVisualized, setShowVisualized] = useState(true)
 
   useEffect(() => {
@@ -33,10 +34,18 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
     // Auto-generate visualization when room image is available
     const generateVisualization = async () => {
       setIsGenerating(true)
+      setGenerationError(null)
+      console.log(`[Gemini] Starting visualization for ${color.name} (${color.hex})`)
+
       const result = await generateRoomVisualization(roomImage, { name: color.name, hex: color.hex })
+
       if (result.success && result.imageUrl) {
+        console.log(`[Gemini] Successfully generated visualization for ${color.name}`)
         setVisualizedImage(result.imageUrl)
         cacheVisualization(cacheKey, result.imageUrl)
+      } else {
+        console.error(`[Gemini] Failed to generate visualization for ${color.name}:`, result.error)
+        setGenerationError(result.error || 'Failed to generate')
       }
       setIsGenerating(false)
     }
@@ -53,7 +62,7 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
   return (
     <div className="card overflow-hidden">
       {/* Swatch / Visualization */}
-      <div className="h-48 relative">
+      <div className="h-48 relative overflow-hidden">
         {/* Show visualized image if available, otherwise show color swatch */}
         {visualizedImage && showVisualized ? (
           <img
@@ -61,13 +70,36 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
             alt={`Room with ${color.name}`}
             className="w-full h-full object-cover"
           />
-        ) : isGenerating ? (
-          <div
-            className="w-full h-full flex flex-col items-center justify-center"
-            style={{ backgroundColor: color.hex }}
-          >
-            <Loader2 className="w-8 h-8 text-white/80 animate-spin mb-2" />
-            <span className="text-white/80 text-sm">Visualizing...</span>
+        ) : isGenerating && roomImage ? (
+          /* Loading state: blurred room image with spinner */
+          <div className="w-full h-full relative">
+            <img
+              src={roomImage}
+              alt="Your room"
+              className="w-full h-full object-cover blur-sm brightness-75"
+            />
+            <div className="absolute inset-0 flex flex-col items-center justify-center">
+              <div
+                className="w-12 h-12 rounded-full mb-2 flex items-center justify-center"
+                style={{ backgroundColor: color.hex }}
+              >
+                <Loader2 className="w-6 h-6 text-white animate-spin" />
+              </div>
+              <span className="text-white text-sm font-medium drop-shadow-md">
+                Painting walls...
+              </span>
+            </div>
+          </div>
+        ) : generationError && roomImage ? (
+          /* Error state: show swatch with error message */
+          <div className="w-full h-full relative">
+            <div
+              className="w-full h-full"
+              style={{ backgroundColor: color.hex }}
+            />
+            <div className="absolute bottom-2 left-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+              Visualization unavailable
+            </div>
           </div>
         ) : (
           <div
