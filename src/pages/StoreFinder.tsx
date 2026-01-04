@@ -1,81 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, MapPin, Phone, Navigation, Star, Clock, Search } from 'lucide-react'
+import { ArrowLeft, MapPin, Phone, Navigation, Star, Clock, Search, Loader2, MapPinOff } from 'lucide-react'
 import { Store } from '../types'
 
-// Mock store data (in real app, this would come from MapKit API)
-const mockStores: Store[] = [
-  {
-    id: 'sw-downtown',
-    name: 'Sherwin-Williams',
-    brandAffiliation: ['sw'],
-    storeType: 'brand_store',
-    distance: 0.8,
-    address: '123 Main Street',
-    city: 'Downtown',
-    state: 'NY',
-    phone: '(212) 555-0123',
-    hours: 'Open until 6 PM',
-    isOpen: true,
-    isFavorite: false
-  },
-  {
-    id: 'bm-dealer',
-    name: 'Benjamin Moore Dealer - Color World',
-    brandAffiliation: ['bm'],
-    storeType: 'independent',
-    distance: 1.2,
-    address: '456 Oak Avenue',
-    city: 'Midtown',
-    state: 'NY',
-    phone: '(212) 555-0456',
-    hours: 'Open until 7 PM',
-    isOpen: true,
-    isFavorite: true
-  },
-  {
-    id: 'home-depot',
-    name: 'The Home Depot',
-    brandAffiliation: ['behr', 'ppg'],
-    storeType: 'big_box',
-    distance: 2.1,
-    address: '789 Commerce Blvd',
-    city: 'Suburbs',
-    state: 'NY',
-    phone: '(212) 555-0789',
-    hours: 'Open until 9 PM',
-    isOpen: true,
-    isFavorite: false
-  },
-  {
-    id: 'lowes',
-    name: "Lowe's",
-    brandAffiliation: ['valspar', 'sw'],
-    storeType: 'big_box',
-    distance: 2.4,
-    address: '321 Retail Park',
-    city: 'Suburbs',
-    state: 'NY',
-    phone: '(212) 555-0321',
-    hours: 'Open until 9 PM',
-    isOpen: true,
-    isFavorite: false
-  },
-  {
-    id: 'ace-hardware',
-    name: 'Ace Hardware',
-    brandAffiliation: ['bm', 'sw'],
-    storeType: 'hardware',
-    distance: 0.5,
-    address: '55 Local Lane',
-    city: 'Downtown',
-    state: 'NY',
-    phone: '(212) 555-0055',
-    hours: 'Closed - Opens 8 AM',
-    isOpen: false,
-    isFavorite: false
-  }
-]
+const API_ENDPOINT = 'https://color-edit-api.rkrigney.workers.dev'
 
 const brandLabels: Record<string, string> = {
   sw: 'Sherwin-Williams',
@@ -85,11 +13,141 @@ const brandLabels: Record<string, string> = {
   valspar: 'Valspar'
 }
 
+// Map Google Places types to our brand affiliations
+function inferBrandAffiliation(name: string, types: string[]): string[] {
+  const nameLower = name.toLowerCase()
+  const affiliations: string[] = []
+
+  if (nameLower.includes('sherwin') || nameLower.includes('sw')) {
+    affiliations.push('sw')
+  }
+  if (nameLower.includes('benjamin moore') || nameLower.includes('bm')) {
+    affiliations.push('bm')
+  }
+  if (nameLower.includes('home depot')) {
+    affiliations.push('behr', 'ppg')
+  }
+  if (nameLower.includes('lowe')) {
+    affiliations.push('valspar', 'sw')
+  }
+  if (nameLower.includes('ace hardware')) {
+    affiliations.push('bm', 'sw')
+  }
+  if (nameLower.includes('ppg')) {
+    affiliations.push('ppg')
+  }
+
+  // Default for paint stores without clear affiliation
+  if (affiliations.length === 0 && (types.includes('paint_store') || nameLower.includes('paint'))) {
+    affiliations.push('sw', 'bm') // Most independent stores carry major brands
+  }
+
+  return affiliations
+}
+
+function inferStoreType(name: string): Store['storeType'] {
+  const nameLower = name.toLowerCase()
+  if (nameLower.includes('sherwin') || nameLower.includes('benjamin moore') || nameLower.includes('ppg')) {
+    return 'brand_store'
+  }
+  if (nameLower.includes('home depot') || nameLower.includes('lowe')) {
+    return 'big_box'
+  }
+  if (nameLower.includes('ace') || nameLower.includes('true value')) {
+    return 'hardware'
+  }
+  return 'independent'
+}
+
 export default function StoreFinder() {
   const navigate = useNavigate()
-  const [stores, setStores] = useState(mockStores)
+  const [stores, setStores] = useState<Store[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [filterBrand, setFilterBrand] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [locationStatus, setLocationStatus] = useState<'requesting' | 'granted' | 'denied' | 'error'>('requesting')
+
+  useEffect(() => {
+    requestLocation()
+  }, [])
+
+  const requestLocation = () => {
+    setIsLoading(true)
+    setError(null)
+    setLocationStatus('requesting')
+
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser')
+      setLocationStatus('error')
+      setIsLoading(false)
+      return
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        setLocationStatus('granted')
+        await fetchNearbyStores(position.coords.latitude, position.coords.longitude)
+      },
+      (err) => {
+        console.error('Geolocation error:', err)
+        setLocationStatus('denied')
+        setError('Please enable location access to find stores near you')
+        setIsLoading(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000 // Cache for 5 minutes
+      }
+    )
+  }
+
+  const fetchNearbyStores = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(`${API_ENDPOINT}/stores`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          latitude: lat,
+          longitude: lng,
+          radius: 32187, // 20 miles in meters
+          limit: 5
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch stores')
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.stores) {
+        const mappedStores: Store[] = data.stores.map((place: any, index: number) => ({
+          id: place.place_id || `store-${index}`,
+          name: place.name,
+          brandAffiliation: inferBrandAffiliation(place.name, place.types || []),
+          storeType: inferStoreType(place.name),
+          distance: place.distance ? Math.round(place.distance * 10) / 10 : 0,
+          address: place.vicinity || place.formatted_address || '',
+          city: '', // Places API doesn't separate city
+          state: '',
+          phone: place.formatted_phone_number || '',
+          hours: place.opening_hours?.open_now ? 'Open now' : 'Hours unavailable',
+          isOpen: place.opening_hours?.open_now ?? true,
+          isFavorite: false
+        }))
+        setStores(mappedStores)
+      } else {
+        setError('No paint stores found within 20 miles')
+      }
+    } catch (err) {
+      console.error('Error fetching stores:', err)
+      setError('Unable to find nearby stores. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filteredStores = stores
     .filter(store => {
@@ -121,12 +179,15 @@ export default function StoreFinder() {
   }
 
   const handleDirections = (store: Store) => {
-    const address = encodeURIComponent(`${store.address}, ${store.city}, ${store.state}`)
-    window.open(`https://maps.apple.com/?daddr=${address}`, '_blank')
+    const address = encodeURIComponent(store.address)
+    // Use Google Maps for broader compatibility
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${address}`, '_blank')
   }
 
   const handleCall = (phone: string) => {
-    window.open(`tel:${phone.replace(/[^0-9]/g, '')}`, '_blank')
+    if (phone) {
+      window.open(`tel:${phone.replace(/[^0-9]/g, '')}`, '_blank')
+    }
   }
 
   return (
@@ -177,88 +238,121 @@ export default function StoreFinder() {
         </div>
       </header>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <Loader2 className="w-8 h-8 text-charcoal animate-spin mb-4" />
+          <p className="text-charcoal-light text-center">
+            {locationStatus === 'requesting' ? 'Requesting location access...' : 'Finding paint stores near you...'}
+          </p>
+        </div>
+      )}
+
+      {/* Error / Permission Denied State */}
+      {!isLoading && error && (
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <MapPinOff className="w-12 h-12 text-charcoal-light mb-4" />
+          <p className="text-charcoal text-center mb-2 font-medium">Location Required</p>
+          <p className="text-charcoal-light text-center text-sm mb-6">{error}</p>
+          <button
+            onClick={requestLocation}
+            className="btn-primary"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+
       {/* Location prompt */}
-      <div className="px-4 py-3 bg-cream-100 text-center">
-        <p className="text-xs text-charcoal-light">
-          Showing stores near you. Call ahead to confirm availability.
-        </p>
-      </div>
+      {!isLoading && !error && stores.length > 0 && (
+        <div className="px-4 py-3 bg-cream-100 text-center">
+          <p className="text-xs text-charcoal-light">
+            Showing {stores.length} paint stores within 20 miles. Call ahead to confirm availability.
+          </p>
+        </div>
+      )}
 
       {/* Store List */}
-      <div className="p-4 space-y-3">
-        {filteredStores.map(store => (
-          <div key={store.id} className="card p-4">
-            <div className="flex items-start gap-3 mb-3">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-medium text-charcoal truncate">{store.name}</h3>
-                  {store.isFavorite && (
-                    <Star className="w-4 h-4 text-gold fill-gold flex-shrink-0" />
-                  )}
+      {!isLoading && !error && (
+        <div className="p-4 space-y-3">
+          {filteredStores.map(store => (
+            <div key={store.id} className="card p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-medium text-charcoal truncate">{store.name}</h3>
+                    {store.isFavorite && (
+                      <Star className="w-4 h-4 text-gold fill-gold flex-shrink-0" />
+                    )}
+                  </div>
+                  <p className="text-sm text-charcoal-light">{store.distance} mi away</p>
                 </div>
-                <p className="text-sm text-charcoal-light">{store.city} · {store.distance} mi</p>
+                <div className={`px-2 py-1 rounded-full text-xs ${
+                  store.isOpen ? 'bg-emerald-50 text-emerald-700' : 'bg-charcoal/5 text-charcoal-light'
+                }`}>
+                  {store.isOpen ? 'Open' : 'Closed'}
+                </div>
               </div>
-              <div className={`px-2 py-1 rounded-full text-xs ${
-                store.isOpen ? 'bg-emerald-50 text-emerald-700' : 'bg-charcoal/5 text-charcoal-light'
-              }`}>
-                {store.isOpen ? 'Open' : 'Closed'}
+
+              {/* Address & Hours */}
+              <div className="flex items-center gap-2 text-sm text-charcoal-light mb-2">
+                <MapPin className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{store.address}</span>
               </div>
-            </div>
+              <div className="flex items-center gap-2 text-sm text-charcoal-light mb-3">
+                <Clock className="w-4 h-4 flex-shrink-0" />
+                <span>{store.hours}</span>
+              </div>
 
-            {/* Address & Hours */}
-            <div className="flex items-center gap-2 text-sm text-charcoal-light mb-2">
-              <MapPin className="w-4 h-4 flex-shrink-0" />
-              <span>{store.address}</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-charcoal-light mb-3">
-              <Clock className="w-4 h-4 flex-shrink-0" />
-              <span>{store.hours}</span>
-            </div>
+              {/* Brands carried */}
+              {store.brandAffiliation.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-4">
+                  {store.brandAffiliation.map(brand => (
+                    <span
+                      key={brand}
+                      className="px-2 py-0.5 bg-cream-100 text-charcoal-light text-xs rounded-full"
+                    >
+                      {brandLabels[brand] || brand}
+                    </span>
+                  ))}
+                </div>
+              )}
 
-            {/* Brands carried */}
-            <div className="flex flex-wrap gap-1 mb-4">
-              {store.brandAffiliation.map(brand => (
-                <span
-                  key={brand}
-                  className="px-2 py-0.5 bg-cream-100 text-charcoal-light text-xs rounded-full"
+              {/* Actions */}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleDirections(store)}
+                  className="flex-1 btn-secondary flex items-center justify-center gap-2 text-sm"
                 >
-                  {brandLabels[brand] || brand}
-                </span>
-              ))}
+                  <Navigation className="w-4 h-4" />
+                  Directions
+                </button>
+                {store.phone && (
+                  <button
+                    onClick={() => handleCall(store.phone)}
+                    className="flex-1 btn-secondary flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Phone className="w-4 h-4" />
+                    Call
+                  </button>
+                )}
+                <button
+                  onClick={() => toggleFavorite(store.id)}
+                  className={`btn-secondary px-3 ${store.isFavorite ? 'text-gold' : ''}`}
+                >
+                  <Star className={`w-4 h-4 ${store.isFavorite ? 'fill-gold' : ''}`} />
+                </button>
+              </div>
             </div>
+          ))}
 
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => handleDirections(store)}
-                className="flex-1 btn-secondary flex items-center justify-center gap-2 text-sm"
-              >
-                <Navigation className="w-4 h-4" />
-                Directions
-              </button>
-              <button
-                onClick={() => handleCall(store.phone)}
-                className="flex-1 btn-secondary flex items-center justify-center gap-2 text-sm"
-              >
-                <Phone className="w-4 h-4" />
-                Call
-              </button>
-              <button
-                onClick={() => toggleFavorite(store.id)}
-                className={`btn-secondary px-3 ${store.isFavorite ? 'text-gold' : ''}`}
-              >
-                <Star className={`w-4 h-4 ${store.isFavorite ? 'fill-gold' : ''}`} />
-              </button>
+          {filteredStores.length === 0 && stores.length > 0 && (
+            <div className="text-center py-8">
+              <p className="text-charcoal-light">No stores found matching your search.</p>
             </div>
-          </div>
-        ))}
-
-        {filteredStores.length === 0 && (
-          <div className="text-center py-8">
-            <p className="text-charcoal-light">No stores found matching your search.</p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       {/* Bottom CTA */}
       <div className="fixed bottom-0 left-0 right-0 bg-cream-50 border-t border-charcoal/10 px-4 py-3 safe-area-inset-bottom">

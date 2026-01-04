@@ -35,7 +35,7 @@ export interface PaintColor {
 }
 
 export interface UserRoomProfile {
-  roomType: 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'nursery' | 'exterior'
+  roomType: 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'nursery'
   lighting: {
     direction: 'north' | 'south' | 'east' | 'west' | 'unknown'
     primaryUsage: 'day' | 'night' | 'both'

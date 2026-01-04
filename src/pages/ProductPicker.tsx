@@ -22,23 +22,7 @@ const steps: Step[] = [
       { label: 'Trim', value: 'trim' },
       { label: 'Doors', value: 'doors' },
       { label: 'Cabinets', value: 'cabinets' },
-      { label: 'Ceiling', value: 'ceiling' },
-      { label: 'Exterior siding', value: 'exterior_siding' },
-      { label: 'Exterior trim/doors', value: 'exterior_trim' }
-    ]
-  },
-  {
-    id: 'room',
-    title: 'Where is it?',
-    options: [
-      { label: 'Bedroom', value: 'bedroom' },
-      { label: 'Living / dining', value: 'living' },
-      { label: 'Kitchen', value: 'kitchen' },
-      { label: 'Bathroom', value: 'bathroom' },
-      { label: 'Hallway / entry', value: 'hallway' },
-      { label: 'Kids room / playroom', value: 'kids' },
-      { label: 'Laundry / utility', value: 'utility' },
-      { label: 'Exterior', value: 'exterior' }
+      { label: 'Ceiling', value: 'ceiling' }
     ]
   },
   {
@@ -101,7 +85,6 @@ export default function ProductPicker() {
   const [noRegretsMode, setNoRegretsMode] = useState(false)
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({
     surface: '',
-    room: '',
     condition: '',
     priorities: [],
     sheen: '',
@@ -155,12 +138,12 @@ export default function ProductPicker() {
       answers.surface as string
     )
 
-    // Determine sheen
+    // Determine sheen based on room type from profile
     let sheen = answers.sheen as string
     if (sheen === 'auto') {
-      const room = answers.room as string
+      const room = profile?.roomType || 'living'
       if (room === 'bathroom') sheen = 'satin'
-      else if (room === 'kitchen' || room === 'hallway' || room === 'kids') sheen = 'eggshell'
+      else if (room === 'kitchen' || room === 'hallway') sheen = 'eggshell'
       else if (room === 'bedroom' && !noRegretsMode) sheen = 'matte'
       else sheen = 'eggshell'
     }
@@ -173,7 +156,7 @@ export default function ProductPicker() {
 
     const item: ShoppingListItem = {
       id: `${color.id}-${answers.surface}-${Date.now()}`,
-      roomName: profile?.roomType || (answers.room as string),
+      roomName: profile?.roomType || 'living',
       surface: answers.surface as string,
       color,
       productLine: productLine.name,
@@ -183,7 +166,7 @@ export default function ProductPicker() {
       primer: { needed: primer.needed, type: primer.type, gallons: primer.needed ? 1 : 0 },
       productSpec: {
         surface: answers.surface as string,
-        room: answers.room as string,
+        room: profile?.roomType || 'living',
         condition: answers.condition as string,
         priorities,
         sheen,
