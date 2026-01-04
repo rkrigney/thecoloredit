@@ -51,12 +51,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   }
 
   const handleGoogleLogin = () => {
-    const clientName = 'thecoloredit'
-    const redirectUrl = window.location.origin + '/thecoloredit/'
-    db.auth.signInWithRedirect({
-      clientName,
-      redirectURL: redirectUrl
+    const url = db.auth.createAuthorizationURL({
+      clientName: 'google-web',
+      redirectURL: window.location.href
     })
+    window.location.href = url
   }
 
   const resetFlow = () => {
