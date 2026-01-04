@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { useState, createContext, useContext } from 'react'
+import { useState, useEffect, createContext, useContext } from 'react'
 import Home from './pages/Home'
 import RoomSetup from './pages/RoomSetup'
 import Shortlist from './pages/Shortlist'
@@ -13,6 +13,14 @@ import SavedShortlists from './pages/SavedShortlists'
 import SavedShoppingLists from './pages/SavedShoppingLists'
 import UserMenu from './components/UserMenu'
 import { UserRoomProfile, ScoredColor, ShoppingListItem } from './types'
+
+// LocalStorage keys
+const STORAGE_KEYS = {
+  shortlist: 'thecoloredit_shortlist',
+  shoppingList: 'thecoloredit_shoppingList',
+  profile: 'thecoloredit_profile',
+  roomImage: 'thecoloredit_roomImage'
+}
 
 interface AppContextType {
   profile: UserRoomProfile | null
@@ -62,27 +70,77 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   )
 }
 
+// Helper to safely parse JSON from localStorage
+function loadFromStorage<T>(key: string, defaultValue: T): T {
+  try {
+    const stored = localStorage.getItem(key)
+    return stored ? JSON.parse(stored) : defaultValue
+  } catch {
+    return defaultValue
+  }
+}
+
 function App() {
-  const [profile, setProfile] = useState<UserRoomProfile | null>(null)
-  const [shortlist, setShortlist] = useState<ScoredColor[]>([])
+  // Initialize state from localStorage
+  const [profile, setProfileState] = useState<UserRoomProfile | null>(() =>
+    loadFromStorage(STORAGE_KEYS.profile, null)
+  )
+  const [shortlist, setShortlistState] = useState<ScoredColor[]>(() =>
+    loadFromStorage(STORAGE_KEYS.shortlist, [])
+  )
   const [compareColors, setCompareColors] = useState<[ScoredColor | null, ScoredColor | null]>([null, null])
-  const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([])
-  const [roomImage, setRoomImage] = useState<string | null>(null)
+  const [shoppingList, setShoppingListState] = useState<ShoppingListItem[]>(() =>
+    loadFromStorage(STORAGE_KEYS.shoppingList, [])
+  )
+  const [roomImage, setRoomImageState] = useState<string | null>(() =>
+    loadFromStorage(STORAGE_KEYS.roomImage, null)
+  )
+
+  // Persist to localStorage when state changes
+  useEffect(() => {
+    if (shortlist.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.shortlist, JSON.stringify(shortlist))
+    }
+  }, [shortlist])
+
+  useEffect(() => {
+    if (shoppingList.length > 0) {
+      localStorage.setItem(STORAGE_KEYS.shoppingList, JSON.stringify(shoppingList))
+    }
+  }, [shoppingList])
+
+  useEffect(() => {
+    if (profile) {
+      localStorage.setItem(STORAGE_KEYS.profile, JSON.stringify(profile))
+    }
+  }, [profile])
+
+  useEffect(() => {
+    if (roomImage) {
+      localStorage.setItem(STORAGE_KEYS.roomImage, JSON.stringify(roomImage))
+    }
+  }, [roomImage])
+
+  // Wrapped setters that also persist
+  const setProfile = (p: UserRoomProfile) => setProfileState(p)
+  const setShortlist = (s: ScoredColor[]) => setShortlistState(s)
+  const setRoomImage = (img: string | null) => setRoomImageState(img)
 
   const addToShoppingList = (item: ShoppingListItem) => {
-    setShoppingList(prev => [...prev.filter(i => i.id !== item.id), item])
+    setShoppingListState(prev => [...prev.filter(i => i.id !== item.id), item])
   }
 
   const removeFromShoppingList = (id: string) => {
-    setShoppingList(prev => prev.filter(i => i.id !== id))
+    setShoppingListState(prev => prev.filter(i => i.id !== id))
   }
 
   const clearShoppingList = () => {
-    setShoppingList([])
+    localStorage.removeItem(STORAGE_KEYS.shoppingList)
+    setShoppingListState([])
   }
 
   const setShoppingListFromSaved = (items: ShoppingListItem[]) => {
-    setShoppingList(items)
+    setShoppingListState(items)
   }
 
   return (

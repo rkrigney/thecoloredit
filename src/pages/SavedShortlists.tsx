@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Palette, Trash2, Calendar, Loader2 } from 'lucide-react'
+import { ArrowLeft, Palette, Trash2, Clock, Loader2, Star } from 'lucide-react'
 import { db } from '../lib/instantdb'
 import { useAppContext } from '../App'
 import { ScoredColor } from '../types'
@@ -8,18 +8,27 @@ import { ScoredColor } from '../types'
 export default function SavedShortlists() {
   const navigate = useNavigate()
   const { user } = db.useAuth()
-  const { setShortlist, setProfile } = useAppContext()
+  const { shortlist: currentShortlist, setShortlist, profile, setProfile } = useAppContext()
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
+  // Query saved shortlists - simplified query without ordering
   const { isLoading, data, error } = db.useQuery(
     user
-      ? {
-          savedShortlists: {
-            $: { where: { userId: user.id }, order: { createdAt: 'desc' } }
-          }
-        }
+      ? { savedShortlists: {} }
       : null
   ) as { isLoading: boolean; data: { savedShortlists?: any[] } | undefined; error: any }
+
+  // Filter to user's shortlists and sort client-side
+  const userShortlists = data?.savedShortlists
+    ?.filter((s: any) => s.userId === user?.id)
+    ?.sort((a: any, b: any) => (b.createdAt || 0) - (a.createdAt || 0)) || []
+
+  // Log errors for debugging
+  useEffect(() => {
+    if (error) {
+      console.error('InstantDB query error:', error)
+    }
+  }, [error])
 
   if (!user) {
     navigate('/')
@@ -30,7 +39,6 @@ export default function SavedShortlists() {
     try {
       const shortlistData = JSON.parse(savedShortlist.shortlistData) as ScoredColor[]
       setShortlist(shortlistData)
-      // Set minimal profile for navigation
       setProfile({
         roomType: savedShortlist.roomType as 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'nursery',
         lighting: { direction: 'unknown', primaryUsage: 'both', bulbTemp: 'unknown' },
@@ -58,10 +66,22 @@ export default function SavedShortlists() {
   }
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString('en-US', {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffMins = Math.floor(diffMs / 60000)
+    const diffHours = Math.floor(diffMs / 3600000)
+    const diffDays = Math.floor(diffMs / 86400000)
+
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins}m ago`
+    if (diffHours < 24) return `${diffHours}h ago`
+    if (diffDays < 7) return `${diffDays}d ago`
+
+    return date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     })
   }
 
@@ -75,8 +95,10 @@ export default function SavedShortlists() {
     nursery: 'Nursery'
   }
 
+  const hasCurrentSession = currentShortlist.length > 0
+
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 pb-8">
       {/* Header */}
       <header className="sticky top-0 bg-cream-50/95 backdrop-blur-sm z-10 px-4 py-4 border-b border-charcoal/5">
         <div className="flex items-center justify-between">
@@ -91,86 +113,157 @@ export default function SavedShortlists() {
         </div>
       </header>
 
-      {/* Content */}
-      <div className="p-4">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-charcoal-light" />
-          </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-charcoal-light">Failed to load saved shortlists.</p>
-          </div>
-        ) : !data?.savedShortlists?.length ? (
-          <div className="text-center py-12">
-            <Palette className="w-12 h-12 text-charcoal/20 mx-auto mb-4" />
-            <p className="text-charcoal-light mb-4">No saved shortlists yet.</p>
+      <div className="p-4 space-y-6">
+        {/* Current Session */}
+        {hasCurrentSession && (
+          <div>
+            <h2 className="text-xs font-medium text-charcoal-light uppercase tracking-wide mb-3 flex items-center gap-2">
+              <Star className="w-3.5 h-3.5" />
+              Current Session
+            </h2>
             <button
-              onClick={() => navigate('/setup')}
-              className="btn-primary"
+              onClick={() => navigate('/shortlist')}
+              className="w-full bg-gradient-to-br from-gold/10 to-gold/5 border-2 border-gold/30 rounded-xl p-4 text-left hover:border-gold/50 transition-colors"
             >
-              Create your first shortlist
+              <div className="flex items-start justify-between mb-3">
+                <div>
+                  <h3 className="font-medium text-charcoal">
+                    {profile?.roomType ? roomTypeLabels[profile.roomType] : 'Your shortlist'}
+                  </h3>
+                  <p className="text-sm text-charcoal-light">
+                    {currentShortlist.length} colors · Unsaved
+                  </p>
+                </div>
+                <span className="text-xs bg-gold/20 text-gold px-2 py-1 rounded-full">
+                  Active
+                </span>
+              </div>
+
+              <div className="flex gap-2">
+                {currentShortlist.slice(0, 6).map((scored, i) => (
+                  <div
+                    key={i}
+                    className="w-11 h-11 rounded-lg shadow-sm ring-1 ring-black/5"
+                    style={{ backgroundColor: scored.color.hex }}
+                    title={scored.color.name}
+                  />
+                ))}
+                {currentShortlist.length > 6 && (
+                  <div className="w-11 h-11 rounded-lg bg-charcoal/10 flex items-center justify-center text-xs text-charcoal-light">
+                    +{currentShortlist.length - 6}
+                  </div>
+                )}
+              </div>
             </button>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {data.savedShortlists.map((saved) => {
-              const shortlistData = JSON.parse(saved.shortlistData) as ScoredColor[]
-              const colors = shortlistData.slice(0, 5)
-
-              return (
-                <div
-                  key={saved.id}
-                  className="bg-white rounded-xl border border-charcoal/10 overflow-hidden"
-                >
-                  <button
-                    onClick={() => handleLoad(saved)}
-                    className="w-full p-4 text-left hover:bg-cream-100/50 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="font-medium text-charcoal">{saved.name}</h3>
-                        <p className="text-sm text-charcoal-light">
-                          {roomTypeLabels[saved.roomType] || saved.roomType}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-1 text-xs text-charcoal-light">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(saved.createdAt)}
-                      </div>
-                    </div>
-
-                    {/* Color swatches preview */}
-                    <div className="flex gap-1.5">
-                      {colors.map((scored, i) => (
-                        <div
-                          key={i}
-                          className="w-10 h-10 rounded-lg shadow-sm"
-                          style={{ backgroundColor: scored.color.hex }}
-                          title={scored.color.name}
-                        />
-                      ))}
-                    </div>
-                  </button>
-
-                  <div className="border-t border-charcoal/5 px-4 py-2 flex justify-end">
-                    <button
-                      onClick={() => handleDelete(saved.id)}
-                      disabled={deletingId === saved.id}
-                      className="p-2 text-charcoal-light hover:text-red-600 transition-colors disabled:opacity-50"
-                    >
-                      {deletingId === saved.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Trash2 className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
         )}
+
+        {/* Saved Shortlists */}
+        <div>
+          {(userShortlists.length > 0 || hasCurrentSession) && (
+            <h2 className="text-xs font-medium text-charcoal-light uppercase tracking-wide mb-3 flex items-center gap-2">
+              <Palette className="w-3.5 h-3.5" />
+              Saved
+            </h2>
+          )}
+
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 animate-spin text-charcoal-light" />
+            </div>
+          ) : error ? (
+            <div className="text-center py-8 bg-red-50 rounded-xl">
+              <p className="text-red-600 text-sm mb-2">Unable to load saved shortlists</p>
+              <p className="text-red-400 text-xs">Please try refreshing the page</p>
+            </div>
+          ) : userShortlists.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-xl border border-charcoal/5">
+              <Palette className="w-10 h-10 text-charcoal/15 mx-auto mb-3" />
+              <p className="text-charcoal-light text-sm mb-1">No saved shortlists yet</p>
+              <p className="text-charcoal-lighter text-xs mb-4">
+                Save your shortlists to access them anytime
+              </p>
+              {!hasCurrentSession && (
+                <button
+                  onClick={() => navigate('/setup')}
+                  className="btn-primary text-sm"
+                >
+                  Create a shortlist
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {userShortlists.map((saved: any) => {
+                let colors: ScoredColor[] = []
+                try {
+                  colors = JSON.parse(saved.shortlistData || '[]')
+                } catch {
+                  colors = []
+                }
+
+                return (
+                  <div
+                    key={saved.id}
+                    className="bg-white rounded-xl border border-charcoal/10 overflow-hidden shadow-sm"
+                  >
+                    <button
+                      onClick={() => handleLoad(saved)}
+                      className="w-full p-4 text-left hover:bg-cream-50 transition-colors"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h3 className="font-medium text-charcoal">{saved.name || 'Untitled'}</h3>
+                          <p className="text-sm text-charcoal-light">
+                            {roomTypeLabels[saved.roomType] || 'Room'} · {colors.length} colors
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-charcoal-light">
+                          <Clock className="w-3 h-3" />
+                          {formatDate(saved.createdAt || Date.now())}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-2">
+                        {colors.slice(0, 6).map((scored, i) => (
+                          <div
+                            key={i}
+                            className="w-11 h-11 rounded-lg shadow-sm ring-1 ring-black/5"
+                            style={{ backgroundColor: scored.color?.hex || '#ccc' }}
+                            title={scored.color?.name}
+                          />
+                        ))}
+                        {colors.length > 6 && (
+                          <div className="w-11 h-11 rounded-lg bg-charcoal/10 flex items-center justify-center text-xs text-charcoal-light">
+                            +{colors.length - 6}
+                          </div>
+                        )}
+                      </div>
+                    </button>
+
+                    <div className="border-t border-charcoal/5 px-4 py-2 flex justify-between items-center bg-cream-50/50">
+                      <span className="text-xs text-charcoal-lighter">Tap to load</span>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDelete(saved.id)
+                        }}
+                        disabled={deletingId === saved.id}
+                        className="p-2 text-charcoal-light hover:text-red-600 transition-colors disabled:opacity-50"
+                      >
+                        {deletingId === saved.id ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
