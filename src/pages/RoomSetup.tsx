@@ -55,12 +55,12 @@ const steps: Step[] = [
   {
     id: 'bulbTemp',
     title: 'What kind of light bulbs?',
-    subtitle: 'Check the box — it says "K" for Kelvin.',
+    subtitle: 'Check the bulb packaging — it says "K" for Kelvin.',
     type: 'single',
     options: [
-      { label: 'Warm (2700K)', value: 'warm' },
-      { label: 'Neutral (3000–3500K)', value: 'neutral' },
-      { label: 'Cool (4000K+)', value: 'cool' },
+      { label: 'Warm White (2700K–3000K)', value: 'warm' },
+      { label: 'Neutral White (3500K–4000K)', value: 'neutral' },
+      { label: 'Cool White / Daylight (5000K+)', value: 'cool' },
       { label: 'Not sure', value: 'unknown' }
     ]
   },
@@ -273,7 +273,7 @@ export default function RoomSetup() {
         </div>
 
         {/* Options */}
-        <div className="mb-8">
+        <div className="mb-4">
           {step.type === 'single' && step.options && (
             <div className="flex flex-wrap gap-3">
               {step.options.map(opt => (
@@ -369,7 +369,7 @@ export default function RoomSetup() {
                   <img
                     src={imagePreview}
                     alt="Room preview"
-                    className="w-full h-64 object-cover rounded-2xl"
+                    className="w-full max-h-[60vh] object-contain rounded-2xl"
                   />
                   <button
                     onClick={removeImage}
@@ -388,7 +388,7 @@ export default function RoomSetup() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="px-6 pb-8 safe-area-inset-bottom">
+      <div className="px-6 pb-6 pt-2 safe-area-inset-bottom">
         {isLastStep ? (
           <button
             onClick={handleGenerate}

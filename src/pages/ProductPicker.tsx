@@ -214,7 +214,7 @@ export default function ProductPicker() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 px-6 pt-4 pb-8">
+      <div className="px-6 pt-4 pb-4">
         <h2 className="font-serif text-2xl text-charcoal mb-2">{step.title}</h2>
         {step.subtitle && (
           <p className="text-charcoal-light text-sm mb-6">{step.subtitle}</p>
@@ -278,7 +278,7 @@ export default function ProductPicker() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="px-6 pb-8 safe-area-inset-bottom">
+      <div className="px-6 pb-6 pt-2 safe-area-inset-bottom">
         {isLastStep ? (
           <button
             onClick={handleAddToList}

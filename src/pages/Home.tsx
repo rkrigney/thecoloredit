@@ -92,7 +92,7 @@ export default function Home() {
 
         {/* Version info */}
         <p className="text-center text-xs text-charcoal-lighter/50 pt-2">
-          Version 1.1.0 · Last updated Jan 4, 2026 3:45 PM CST
+          Version 1.2.0 · Last updated Jan 4, 2026 2:45 PM CST
         </p>
       </div>
     </div>
