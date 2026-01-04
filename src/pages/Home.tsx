@@ -89,6 +89,11 @@ export default function Home() {
         <p className="text-center text-xs text-charcoal-lighter pt-4">
           Digital swatches are a starting point. Always test real samples.
         </p>
+
+        {/* Version info */}
+        <p className="text-center text-xs text-charcoal-lighter/50 pt-2">
+          Version 1.1.0 · Last updated Jan 4, 2026 3:45 PM CST
+        </p>
       </div>
     </div>
   )
