@@ -26,8 +26,7 @@ const steps: Step[] = [
       { label: 'Bathroom', value: 'bathroom' },
       { label: 'Hallway', value: 'hallway' },
       { label: 'Home office', value: 'office' },
-      { label: 'Nursery', value: 'nursery' },
-      { label: 'Exterior', value: 'exterior' }
+      { label: 'Nursery', value: 'nursery' }
     ]
   },
   {
