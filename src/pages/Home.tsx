@@ -1,8 +1,24 @@
 import { useNavigate } from 'react-router-dom'
 import { Palette, BookOpen, Home as HomeIcon } from 'lucide-react'
 
+// Injected at build time by Vite
+declare const __BUILD_TIME__: string
+
+function formatBuildTime(isoString: string): string {
+  const date = new Date(isoString)
+  return date.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short'
+  })
+}
+
 export default function Home() {
   const navigate = useNavigate()
+  const buildTime = typeof __BUILD_TIME__ !== 'undefined' ? formatBuildTime(__BUILD_TIME__) : 'Development'
 
   return (
     <div className="min-h-screen bg-cream-50 flex flex-col">
@@ -92,7 +108,7 @@ export default function Home() {
 
         {/* Version info */}
         <p className="text-center text-xs text-charcoal-lighter/50 pt-2">
-          Version 1.2.0 · Last updated Jan 4, 2026 2:45 PM CST
+          Last updated {buildTime}
         </p>
       </div>
     </div>
