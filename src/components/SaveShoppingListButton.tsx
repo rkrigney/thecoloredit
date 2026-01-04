@@ -34,7 +34,7 @@ export default function SaveShoppingListButton({ shoppingList }: SaveShoppingLis
     try {
       const id = crypto.randomUUID()
       await db.transact(
-        db.tx.savedShoppingLists[id].update({
+        (db.tx as any).savedShoppingLists[id].update({
           userId: user.id,
           name: name.trim(),
           createdAt: Date.now(),

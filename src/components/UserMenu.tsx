@@ -22,7 +22,7 @@ export default function UserMenu() {
           }
         }
       : null
-  )
+  ) as { data: { savedShortlists?: any[]; savedShoppingLists?: any[] } | null }
 
   const handleLogout = () => {
     db.auth.signOut()
