@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Copy, Share2, Trash2, MapPin } from 'lucide-react'
 import { useAppContext } from '../App'
+import SaveShoppingListButton from '../components/SaveShoppingListButton'
 
 export default function ShoppingList() {
   const navigate = useNavigate()
@@ -76,7 +77,7 @@ export default function ShoppingList() {
   return (
     <div className="min-h-screen bg-cream-50 pb-24">
       {/* Header */}
-      <header className="sticky top-0 bg-cream-50/95 backdrop-blur-sm z-10 px-4 py-4 border-b border-charcoal/5">
+      <header className="px-4 py-4 border-b border-charcoal/5">
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
@@ -85,12 +86,15 @@ export default function ShoppingList() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <h1 className="font-serif text-lg text-charcoal">Shopping List</h1>
-          <button
-            onClick={clearShoppingList}
-            className="p-2 -mr-2 text-charcoal-light hover:text-red-500 transition-colors"
-          >
-            <Trash2 className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <SaveShoppingListButton shoppingList={shoppingList} />
+            <button
+              onClick={clearShoppingList}
+              className="p-2 text-charcoal-light hover:text-red-500 transition-colors"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </header>
 
