@@ -51,10 +51,8 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation()
 
   // Pages that have their own header and don't need the global user menu bar
-  const pagesWithOwnHeader = ['/', '/setup', '/product-picker']
-  const showUserMenuBar = !pagesWithOwnHeader.some(path =>
-    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
-  )
+  const pagesWithOwnHeader = ['/setup', '/product-picker']
+  const showUserMenuBar = !pagesWithOwnHeader.some(path => location.pathname.startsWith(path))
 
   return (
     <div className="min-h-screen bg-cream-50">
