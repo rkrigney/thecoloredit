@@ -5,6 +5,7 @@ import { useAppContext } from '../App'
 import { ScoredColor } from '../types'
 import { generateRoomVisualization, getCacheKey, getCachedVisualization, cacheVisualization } from '../utils/gemini'
 import LightingSlider from '../components/LightingSlider'
+import SaveShortlistButton from '../components/SaveShortlistButton'
 
 const tagLabels: Record<string, { label: string; bg: string; text: string }> = {
   safe_win: { label: 'Safe Win', bg: 'bg-emerald-50', text: 'text-emerald-700' },
@@ -258,7 +259,7 @@ export default function Shortlist() {
   return (
     <div className="min-h-screen bg-cream-50 pb-24">
       {/* Header */}
-      <header className="sticky top-0 bg-cream-50/95 backdrop-blur-sm z-10 px-4 py-4 border-b border-charcoal/5">
+      <header className="px-4 py-4 border-b border-charcoal/5">
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate('/setup')}
@@ -270,7 +271,7 @@ export default function Shortlist() {
             <h1 className="font-serif text-lg text-charcoal">Your Shortlist</h1>
             <p className="text-xs text-charcoal-light">{roomTypeLabels[profile.roomType]}</p>
           </div>
-          <div className="w-9" />
+          <SaveShortlistButton shortlist={shortlist} profile={profile} />
         </div>
       </header>
 

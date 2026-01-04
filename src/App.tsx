@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { useState, createContext, useContext } from 'react'
 import Home from './pages/Home'
 import RoomSetup from './pages/RoomSetup'
@@ -9,6 +9,9 @@ import ProductPicker from './pages/ProductPicker'
 import ShoppingList from './pages/ShoppingList'
 import StoreFinder from './pages/StoreFinder'
 import SamplingPlan from './pages/SamplingPlan'
+import SavedShortlists from './pages/SavedShortlists'
+import SavedShoppingLists from './pages/SavedShoppingLists'
+import UserMenu from './components/UserMenu'
 import { UserRoomProfile, ScoredColor, ShoppingListItem } from './types'
 
 interface AppContextType {
@@ -22,6 +25,7 @@ interface AppContextType {
   addToShoppingList: (item: ShoppingListItem) => void
   removeFromShoppingList: (id: string) => void
   clearShoppingList: () => void
+  setShoppingListFromSaved: (items: ShoppingListItem[]) => void
   roomImage: string | null
   setRoomImage: (img: string | null) => void
 }
@@ -32,6 +36,28 @@ export function useAppContext() {
   const context = useContext(AppContext)
   if (!context) throw new Error('useAppContext must be used within AppProvider')
   return context
+}
+
+// Layout component that shows UserMenu on appropriate pages
+function AppLayout({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+
+  // Pages that have their own header and don't need the global user menu bar
+  const pagesWithOwnHeader = ['/setup', '/product-picker']
+  const showUserMenuBar = !pagesWithOwnHeader.some(path => location.pathname.startsWith(path))
+
+  return (
+    <div className="min-h-screen bg-cream-50">
+      {showUserMenuBar && (
+        <div className="sticky top-0 z-50 bg-cream-50/95 backdrop-blur-sm border-b border-charcoal/5">
+          <div className="flex justify-end px-4 py-2">
+            <UserMenu />
+          </div>
+        </div>
+      )}
+      {children}
+    </div>
+  )
 }
 
 function App() {
@@ -53,6 +79,10 @@ function App() {
     setShoppingList([])
   }
 
+  const setShoppingListFromSaved = (items: ShoppingListItem[]) => {
+    setShoppingList(items)
+  }
+
   return (
     <AppContext.Provider
       value={{
@@ -66,12 +96,13 @@ function App() {
         addToShoppingList,
         removeFromShoppingList,
         clearShoppingList,
+        setShoppingListFromSaved,
         roomImage,
         setRoomImage
       }}
     >
       <BrowserRouter basename="/thecoloredit">
-        <div className="min-h-screen bg-cream-50">
+        <AppLayout>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/setup" element={<RoomSetup />} />
@@ -82,8 +113,10 @@ function App() {
             <Route path="/shopping-list" element={<ShoppingList />} />
             <Route path="/stores" element={<StoreFinder />} />
             <Route path="/sampling-plan" element={<SamplingPlan />} />
+            <Route path="/saved-shortlists" element={<SavedShortlists />} />
+            <Route path="/saved-shopping-lists" element={<SavedShoppingLists />} />
           </Routes>
-        </div>
+        </AppLayout>
       </BrowserRouter>
     </AppContext.Provider>
   )
