@@ -67,14 +67,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-      <div className="bg-cream-50 rounded-2xl w-full max-w-md p-6 relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-charcoal-light hover:text-charcoal transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50">
+      <div className="min-h-full flex items-center justify-center p-4">
+        <div className="bg-cream-50 rounded-2xl w-full max-w-md p-6 relative my-8">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 p-2 text-charcoal-light hover:text-charcoal transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
         <h2 className="font-serif text-2xl text-charcoal mb-2">
           {mode === 'login' ? 'Welcome back' : 'Create account'}
@@ -230,6 +231,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
             </>
           )}
         </p>
+        </div>
       </div>
     </div>
   )
