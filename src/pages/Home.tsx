@@ -1,5 +1,8 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Palette, BookOpen, Home as HomeIcon } from 'lucide-react'
+import { Palette, BookOpen, Home as HomeIcon, User } from 'lucide-react'
+import { db } from '../lib/instantdb'
+import AuthModal from '../components/AuthModal'
 
 // Injected at build time by Vite
 declare const __BUILD_TIME__: string
@@ -18,12 +21,36 @@ function formatBuildTime(isoString: string): string {
 
 export default function Home() {
   const navigate = useNavigate()
+  const { user } = db.useAuth()
+  const [showAuthModal, setShowAuthModal] = useState(false)
   const buildTime = typeof __BUILD_TIME__ !== 'undefined' ? formatBuildTime(__BUILD_TIME__) : 'Development'
 
   return (
+    <>
+    <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
     <div className="min-h-screen bg-cream-50 flex flex-col">
+      {/* Sign in button */}
+      <div className="flex justify-end px-4 pt-4">
+        {user ? (
+          <div className="flex items-center gap-2 px-3 py-1.5 text-sm text-charcoal">
+            <div className="w-7 h-7 rounded-full bg-gold/20 flex items-center justify-center">
+              <User className="w-4 h-4 text-gold" />
+            </div>
+            <span className="max-w-[120px] truncate">{user.email?.split('@')[0]}</span>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="flex items-center gap-2 px-3 py-1.5 text-sm text-charcoal-light hover:text-charcoal transition-colors"
+          >
+            <User className="w-4 h-4" />
+            <span>Sign in</span>
+          </button>
+        )}
+      </div>
+
       {/* Hero Section */}
-      <div className="flex-1 flex flex-col justify-center px-6 pt-12 pb-8">
+      <div className="flex-1 flex flex-col justify-center px-6 pt-6 pb-8">
         {/* Logo/Brand */}
         <div className="mb-12">
           <h1 className="font-serif text-3xl text-charcoal tracking-tight">
@@ -112,5 +139,6 @@ export default function Home() {
         </p>
       </div>
     </div>
+    </>
   )
 }
