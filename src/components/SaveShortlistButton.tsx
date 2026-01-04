@@ -35,7 +35,7 @@ export default function SaveShortlistButton({ shortlist, profile }: SaveShortlis
     try {
       const id = crypto.randomUUID()
       await db.transact(
-        db.tx.savedShortlists[id].update({
+        (db.tx as any).savedShortlists[id].update({
           userId: user.id,
           name: name.trim(),
           createdAt: Date.now(),

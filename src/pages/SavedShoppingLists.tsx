@@ -19,7 +19,7 @@ export default function SavedShoppingLists() {
           }
         }
       : null
-  )
+  ) as { isLoading: boolean; data: { savedShoppingLists?: any[] } | undefined; error: any }
 
   if (!user) {
     navigate('/')
@@ -39,7 +39,7 @@ export default function SavedShoppingLists() {
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     try {
-      await db.transact(db.tx.savedShoppingLists[id].delete())
+      await db.transact((db.tx as any).savedShoppingLists[id].delete())
     } catch (err) {
       console.error('Failed to delete shopping list:', err)
     } finally {

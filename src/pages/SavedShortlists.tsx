@@ -19,7 +19,7 @@ export default function SavedShortlists() {
           }
         }
       : null
-  )
+  ) as { isLoading: boolean; data: { savedShortlists?: any[] } | undefined; error: any }
 
   if (!user) {
     navigate('/')
@@ -49,7 +49,7 @@ export default function SavedShortlists() {
   const handleDelete = async (id: string) => {
     setDeletingId(id)
     try {
-      await db.transact(db.tx.savedShortlists[id].delete())
+      await db.transact((db.tx as any).savedShortlists[id].delete())
     } catch (err) {
       console.error('Failed to delete shortlist:', err)
     } finally {
