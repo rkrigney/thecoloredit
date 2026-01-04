@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { X, Mail, Loader2 } from 'lucide-react'
 import { db } from '../lib/instantdb'
 
@@ -66,10 +67,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
     setError(null)
   }
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/50">
-      <div className="min-h-full flex items-center justify-center p-4">
-        <div className="bg-cream-50 rounded-2xl w-full max-w-md p-6 relative my-8">
+      <div className="min-h-full flex items-start sm:items-center justify-center px-4 py-12 sm:py-4">
+        <div className="bg-cream-50 rounded-2xl w-full max-w-md p-6 relative">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 text-charcoal-light hover:text-charcoal transition-colors"
@@ -233,6 +234,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
         </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
