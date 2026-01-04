@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, GitCompare, Droplets, Loade
 import { useAppContext } from '../App'
 import { ScoredColor } from '../types'
 import { generateRoomVisualization, getCacheKey, getCachedVisualization, cacheVisualization } from '../utils/gemini'
+import LightingSlider from '../components/LightingSlider'
 
 const tagLabels: Record<string, { label: string; bg: string; text: string }> = {
   safe_win: { label: 'Safe Win', bg: 'bg-emerald-50', text: 'text-emerald-700' },
@@ -61,16 +62,27 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
 
   return (
     <div className="card overflow-hidden">
-      {/* Swatch / Visualization */}
-      <div className="aspect-[4/3] relative overflow-hidden">
-        {/* Show visualized image if available, otherwise show color swatch */}
-        {visualizedImage && showVisualized ? (
-          <img
-            src={visualizedImage}
-            alt={`Room with ${color.name}`}
-            className="w-full h-full object-cover"
-          />
-        ) : isGenerating && roomImage ? (
+      {/* Swatch / Visualization with Lighting Slider */}
+      {visualizedImage && showVisualized ? (
+        <div className="relative">
+          <LightingSlider imageUrl={visualizedImage} colorName={color.name} />
+          {/* Tag badge */}
+          <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium ${tagInfo.bg} ${tagInfo.text} z-10`}>
+            {tagInfo.label}
+          </div>
+          {/* Toggle button */}
+          <button
+            onClick={() => setShowVisualized(!showVisualized)}
+            className="absolute top-3 right-3 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors z-10"
+            title="Show color swatch"
+          >
+            <ImageIcon className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="aspect-[4/3] relative overflow-hidden">
+        {/* Show loading or swatch when no visualization */}
+        {isGenerating && roomImage ? (
           /* Loading state: blurred room image with spinner */
           <div className="w-full h-full relative">
             <img
@@ -108,22 +120,12 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
           />
         )}
 
-        {/* Tag badge */}
+        {/* Tag badge - shown when no visualization */}
         <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium ${tagInfo.bg} ${tagInfo.text}`}>
           {tagInfo.label}
         </div>
-
-        {/* Toggle button when visualization exists */}
-        {visualizedImage && (
-          <button
-            onClick={() => setShowVisualized(!showVisualized)}
-            className="absolute top-3 right-3 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
-            title={showVisualized ? 'Show color swatch' : 'Show room visualization'}
-          >
-            <ImageIcon className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Content */}
       <div className="p-4">
@@ -237,8 +239,7 @@ export default function Shortlist() {
     bathroom: 'Bathroom',
     hallway: 'Hallway',
     office: 'Home office',
-    nursery: 'Nursery',
-    exterior: 'Exterior'
+    nursery: 'Nursery'
   }
 
   const handleCompare = (scored: ScoredColor) => {
