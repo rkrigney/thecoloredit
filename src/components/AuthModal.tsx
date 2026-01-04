@@ -67,7 +67,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }: Au
   }
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50">
+    <div className="fixed inset-0 z-[100] overflow-y-auto bg-black/50">
       <div className="min-h-full flex items-center justify-center p-4">
         <div className="bg-cream-50 rounded-2xl w-full max-w-md p-6 relative my-8">
           <button
