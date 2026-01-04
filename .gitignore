@@ -27,3 +27,6 @@ npm-debug.log*
 # Vite build artifacts
 vite.config.js
 vite.config.d.ts
+
+# Test screenshots
+tests/screenshots/
