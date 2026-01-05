@@ -57,7 +57,7 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-cream-50">
       {showUserMenuBar && (
-        <div className="sticky top-0 z-50 bg-cream-50/95 backdrop-blur-sm border-b border-charcoal/5">
+        <div className="sticky top-0 z-50 backdrop-blur-sm border-b border-slate-200" style={{ backgroundColor: 'rgba(203, 213, 225, 0.95)' }}>
           <div className="flex justify-end px-4 py-2">
             <UserMenu />
           </div>

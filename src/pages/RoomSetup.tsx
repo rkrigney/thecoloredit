@@ -176,23 +176,28 @@ function QuestionIllustration({
   panels: number
   selectedIndex: number
 }) {
-  // Use background-position to show only the selected panel
-  // 0% = leftmost panel, 100% = rightmost panel
-  const positionPercent = panels > 1 ? (selectedIndex / (panels - 1)) * 100 : 0
-
+  // Display image at panels * 100% width so each panel = container width
+  // Shift left by selectedIndex * 100% to show the correct panel
+  // Shift up slightly to crop out the header text from the source image
   return (
     <div className="mt-6 flex justify-center animate-pop-in">
       <div
-        className="rounded-lg shadow-md"
+        className="rounded-lg shadow-md overflow-hidden"
         style={{
-          width: '240px',
-          height: '280px',
-          backgroundImage: `url(${src})`,
-          backgroundSize: `${panels * 100}% auto`,
-          backgroundPosition: `${positionPercent}% top`,
-          backgroundRepeat: 'no-repeat'
+          width: '200px',
+          height: '240px',
         }}
-      />
+      >
+        <img
+          src={src}
+          alt=""
+          style={{
+            width: `${panels * 100}%`,
+            marginLeft: `-${selectedIndex * 100}%`,
+            marginTop: '-8%',
+          }}
+        />
+      </div>
     </div>
   )
 }

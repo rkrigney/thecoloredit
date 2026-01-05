@@ -26,17 +26,15 @@ export default function Home() {
       {/* Hero Section */}
       <div className="flex-1 flex flex-col justify-center px-6 pt-8 pb-10">
         {/* Logo/Brand */}
-        <div className="mb-16">
+        <div className="mb-12">
           <p className="section-label mb-3">Welcome to</p>
           <h1 className="font-serif text-display text-charcoal tracking-tight leading-none">
-            The Color
-            <br />
-            Edit
+            The Color Edit
           </h1>
         </div>
 
         {/* Welcome Illustration */}
-        <div className="mb-12">
+        <div className="mb-10">
           <img
             src={welcomeIllustration}
             alt="Illustration of someone overwhelmed by paint color choices"
@@ -45,24 +43,24 @@ export default function Home() {
         </div>
 
         {/* Value Prop */}
-        <div className="mb-10">
-          <h2 className="font-serif text-headline text-charcoal leading-tight mb-4">
-            Your perfect paint palette, curated in minutes
+        <div className="mb-8">
+          <h2 className="font-serif text-xl text-charcoal leading-tight mb-4">
+            Your perfect paint palette, curated in minutes instead of hours
           </h2>
-          <p className="text-charcoal-light text-subtitle leading-relaxed">
-            Expert recommendations with trim pairings, finish advice, and where to buy.
+          <p className="text-charcoal-light text-sm leading-relaxed">
+            Receive 5 tailored recommendations, complete with trim pairings, finish advice, and exactly where to buy them.
           </p>
         </div>
 
         {/* Trust indicators */}
-        <div className="flex gap-8 text-sm text-charcoal-lighter">
+        <div className="flex flex-col gap-3 text-sm text-charcoal-lighter">
           <div className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-sage" />
-            <span>Matched to your room</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-sage" />
+            <span>Pulled from a database of the top colors for 2026</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-sage" />
-            <span>Undertone-safe picks</span>
+            <div className="w-1.5 h-1.5 rounded-full bg-sage" />
+            <span>Personalized to your room and needs</span>
           </div>
         </div>
       </div>
