@@ -1,11 +1,72 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, GitCompare, Droplets, Loader2, ImageIcon } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, GitCompare, Droplets, Loader2, ImageIcon, Shuffle, RotateCcw, RefreshCw } from 'lucide-react'
 import { useAppContext } from '../App'
-import { ScoredColor } from '../types'
+import { ScoredColor, PaintColor } from '../types'
 import { generateRoomVisualization, getCacheKey, getCachedVisualization, cacheVisualization } from '../utils/gemini'
+import { paintColors, trimColors } from '../data/colors'
 import LightingSlider from '../components/LightingSlider'
 import SaveShortlistButton from '../components/SaveShortlistButton'
+
+// Fun reasoning phrases for surprise colors
+const surpriseReasonings = [
+  "Sometimes the best discoveries come from stepping outside your comfort zone.",
+  "This unexpected gem might just be the fresh perspective your space needs.",
+  "Trust the process—great design often comes from happy accidents.",
+  "Why not? Life's too short for boring walls.",
+  "A wild card pick that could become your new favorite.",
+  "Sometimes you don't know what you want until you see it.",
+  "The universe thinks you should consider this one.",
+  "A curated pick from our favorites—no algorithm, just good taste.",
+  "This color has been waiting for the right room. Maybe it's yours?",
+  "Picked with love by our team. Give it a chance!"
+]
+
+// Generate 5 random surprise colors
+function generateSurpriseShortlist(): ScoredColor[] {
+  // Shuffle and pick 5 diverse colors
+  const shuffled = [...paintColors].sort(() => Math.random() - 0.5)
+  const selected: PaintColor[] = []
+
+  // Try to get variety in depth categories
+  const depths = ['light', 'mid', 'dark', 'very_deep']
+  for (const depth of depths) {
+    const match = shuffled.find(c => c.depthCategory === depth && !selected.includes(c))
+    if (match && selected.length < 5) selected.push(match)
+  }
+
+  // Fill remaining slots randomly
+  for (const color of shuffled) {
+    if (selected.length >= 5) break
+    if (!selected.includes(color)) selected.push(color)
+  }
+
+  // Convert to ScoredColors with fun tags and reasoning
+  const tags: Array<'top_pick' | 'safe_bet' | 'bold_choice'> = ['top_pick', 'safe_bet', 'bold_choice', 'safe_bet', 'bold_choice']
+
+  return selected.slice(0, 5).map((color, i) => {
+    // Find a trim color
+    const trim = trimColors.find(t => color.suggestedTrims.includes(t.id)) || trimColors[0]
+
+    return {
+      color,
+      tag: tags[i],
+      scores: {
+        overall: Math.floor(Math.random() * 20) + 75, // 75-95
+        boldness: Math.floor(Math.random() * 35),
+        vibe: Math.floor(Math.random() * 25),
+        lighting: Math.floor(Math.random() * 20),
+        harmony: Math.floor(Math.random() * 20)
+      },
+      reasoning: surpriseReasonings[Math.floor(Math.random() * surpriseReasonings.length)],
+      suggestedTrim: {
+        crisp: trim,
+        warm: null
+      },
+      suggestedFinish: color.suggestedFinishes[0] || 'eggshell'
+    }
+  })
+}
 
 const tagLabels: Record<string, { label: string; bg: string; text: string; border: string }> = {
   top_pick: { label: 'Top Pick', bg: 'bg-sage-50', text: 'text-sage', border: 'border-sage/20' },
@@ -220,6 +281,26 @@ export default function Shortlist() {
   const navigate = useNavigate()
   const { shortlist, profile, setCompareColors, compareColors, roomImage } = useAppContext()
 
+  // State for surprise mode
+  const [isSurpriseMode, setIsSurpriseMode] = useState(false)
+  const [surpriseColors, setSurpriseColors] = useState<ScoredColor[]>([])
+
+  // The colors to display (either original shortlist or surprise colors)
+  const displayedColors = isSurpriseMode ? surpriseColors : shortlist
+
+  const handleSurpriseMe = () => {
+    const newSurpriseColors = generateSurpriseShortlist()
+    setSurpriseColors(newSurpriseColors)
+    setIsSurpriseMode(true)
+    // Clear any compare selections
+    setCompareColors([null, null])
+  }
+
+  const handleBackToOriginal = () => {
+    setIsSurpriseMode(false)
+    setCompareColors([null, null])
+  }
+
   if (!profile || shortlist.length === 0) {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center p-6">
@@ -263,20 +344,39 @@ export default function Shortlist() {
     <div className="min-h-screen bg-cream-50 pb-24">
       {/* Header */}
       <header className="page-header">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" style={{ maxWidth: '800px', margin: '0 auto' }}>
           <button
-            onClick={() => navigate('/setup')}
+            onClick={() => isSurpriseMode ? handleBackToOriginal() : navigate('/setup')}
             className="p-2 -ml-2 text-charcoal-light hover:text-charcoal transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="text-center">
-            <h1 className="font-serif text-title text-charcoal">Your Shortlist</h1>
-            <p className="text-xs text-charcoal-lighter tracking-wide">{profile.roomType ? roomTypeLabels[profile.roomType] : 'Your space'}</p>
+            <h1 className="font-serif text-title text-charcoal">
+              {isSurpriseMode ? 'Surprise Picks' : 'Your Shortlist'}
+            </h1>
+            <p className="text-xs text-charcoal-lighter tracking-wide">
+              {isSurpriseMode ? 'Hand-curated just for fun' : (profile.roomType ? roomTypeLabels[profile.roomType] : 'Your space')}
+            </p>
           </div>
-          <SaveShortlistButton shortlist={shortlist} profile={profile} />
+          <SaveShortlistButton shortlist={displayedColors} profile={profile} />
         </div>
       </header>
+
+      {/* Back to original shortlist banner (when in surprise mode) */}
+      {isSurpriseMode && (
+        <div className="px-6 py-3 bg-blush-light/30 border-b border-blush/20">
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <button
+              onClick={handleBackToOriginal}
+              className="w-full flex items-center justify-center gap-2 text-sm text-blush-dark hover:text-blush transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Back to your personalized shortlist
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Disclaimer */}
       <div className="px-6 py-4 bg-cream-100 text-center border-b border-cream-200">
@@ -284,6 +384,31 @@ export default function Shortlist() {
           Digital swatches are a starting point. Always test with real samples.
         </p>
       </div>
+
+      {/* Surprise me / Start over section (only show when NOT in surprise mode) */}
+      {!isSurpriseMode && (
+        <div className="px-6 py-5 border-b border-cream-200">
+          <div className="flex items-center gap-4" style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <button
+              onClick={handleSurpriseMe}
+              className="btn-secondary flex items-center gap-2 flex-shrink-0"
+            >
+              <Shuffle className="w-4 h-4" />
+              Surprise me!
+            </button>
+            <p className="text-xs text-charcoal-light flex-1">
+              Don't love these colors? Click to generate five more top paint picks hand-curated by us.
+            </p>
+            <button
+              onClick={() => navigate('/setup')}
+              className="btn-ghost flex items-center gap-2 flex-shrink-0 text-sm"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Start over
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Room image indicator */}
       {roomImage && (
@@ -296,7 +421,7 @@ export default function Shortlist() {
 
       {/* Color Cards */}
       <div className="p-4 space-y-4" style={{ maxWidth: '800px', margin: '0 auto' }}>
-        {shortlist.map(scored => (
+        {displayedColors.map(scored => (
           <ColorCard
             key={scored.color.id}
             scored={scored}
