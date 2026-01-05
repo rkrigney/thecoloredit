@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
-import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, GitCompare, Droplets, Loader2, ImageIcon, Shuffle, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ShoppingBag, MapPin, GitCompare, Droplets, Loader2, ImageIcon, Shuffle, RotateCcw, RefreshCw } from 'lucide-react'
 import { useAppContext } from '../App'
 import { ScoredColor, PaintColor } from '../types'
 import { generateRoomVisualization, getCacheKey, getCachedVisualization, cacheVisualization } from '../utils/gemini'
@@ -385,10 +385,10 @@ export default function Shortlist() {
         </p>
       </div>
 
-      {/* Surprise me section (only show when NOT in surprise mode) */}
+      {/* Surprise me / Start over section (only show when NOT in surprise mode) */}
       {!isSurpriseMode && (
-        <div className="px-6 py-5 border-b border-cream-200" style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div className="flex items-center gap-4">
+        <div className="px-6 py-5 border-b border-cream-200">
+          <div className="flex items-center gap-4" style={{ maxWidth: '800px', margin: '0 auto' }}>
             <button
               onClick={handleSurpriseMe}
               className="btn-secondary flex items-center gap-2 flex-shrink-0"
@@ -396,9 +396,16 @@ export default function Shortlist() {
               <Shuffle className="w-4 h-4" />
               Surprise me!
             </button>
-            <p className="text-xs text-charcoal-light">
+            <p className="text-xs text-charcoal-light flex-1">
               Don't love these colors? Click to generate five more top paint picks hand-curated by us.
             </p>
+            <button
+              onClick={() => navigate('/setup')}
+              className="btn-ghost flex items-center gap-2 flex-shrink-0 text-sm"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Start over
+            </button>
           </div>
         </div>
       )}
