@@ -176,28 +176,30 @@ function QuestionIllustration({
   panels: number
   selectedIndex: number
 }) {
-  // Use transform to scale and position the image
-  // Scale up so each panel fills the container width
-  // Then translate to show the correct panel
-  const translateX = -(selectedIndex * 100 / panels)
-  const translateY = -12 // Crop out header (percentage of scaled image)
+  // Calculate the horizontal position to show the correct panel
+  // Each panel is (100/panels)% of the image width
+  // Position so the selected panel is centered in view
+  const panelWidthPercent = 100 / panels
+  const positionX = (selectedIndex * panelWidthPercent) + (panelWidthPercent / 2)
 
   return (
     <div className="mt-6 flex justify-center animate-pop-in">
       <div
         className="rounded-lg shadow-md overflow-hidden"
         style={{
-          width: '200px',
-          height: '200px',
+          width: '180px',
+          height: '220px',
         }}
       >
         <img
           src={src}
           alt=""
           style={{
-            width: '100%',
-            transformOrigin: 'top left',
-            transform: `scale(${panels}) translate(${translateX}%, ${translateY}%)`,
+            width: `${panels * 100}%`,
+            height: 'auto',
+            objectFit: 'cover',
+            objectPosition: `${positionX}% 85%`, // 85% to show bottom portion (skip header)
+            minHeight: '100%',
           }}
         />
       </div>
@@ -392,7 +394,7 @@ export default function RoomSetup() {
                   <img
                     src={imagePreview}
                     alt="Room preview"
-                    className="w-full"
+                    className="w-full max-h-64 object-contain rounded-lg"
                   />
                   <button
                     onClick={removeImage}
