@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Check, Sparkles, Upload, Camera, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Sparkles, Upload, Camera } from 'lucide-react'
 import { useAppContext } from '../App'
 import { buildShortlist } from '../utils/recommendation'
 import { UserRoomProfile } from '../types'
@@ -148,14 +148,6 @@ export default function RoomSetup() {
     }
   }
 
-  const removeImage = () => {
-    setImagePreview(null)
-    setRoomImage(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
-    }
-  }
-
   const step = steps[currentStep]
   const isLastStep = currentStep === steps.length - 1
 
@@ -273,8 +265,8 @@ export default function RoomSetup() {
                 id="room-image-upload"
               />
 
-              {!imagePreview ? (
-                <div className="space-y-4">
+              <div className="space-y-4">
+                {!imagePreview ? (
                   <label
                     htmlFor="room-image-upload"
                     className="flex flex-col items-center justify-center w-full h-44 border border-cream-300 bg-white cursor-pointer hover:border-sage hover:bg-sage-50 transition-all"
@@ -283,30 +275,27 @@ export default function RoomSetup() {
                     <span className="text-charcoal font-medium">Upload a photo</span>
                     <span className="text-charcoal-lighter text-sm mt-1">or drag and drop</span>
                   </label>
-
-                  <button
+                ) : (
+                  <div
+                    className="w-full border border-cream-300 bg-white overflow-hidden cursor-pointer hover:border-sage transition-all"
                     onClick={() => fileInputRef.current?.click()}
-                    className="btn-secondary flex items-center justify-center gap-2"
                   >
-                    <Camera className="w-5 h-5" />
-                    Take a photo
-                  </button>
-                </div>
-              ) : (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt="Room preview"
-                    className="w-full h-auto rounded-lg"
-                  />
-                  <button
-                    onClick={removeImage}
-                    className="absolute top-3 right-3 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+                    <img
+                      src={imagePreview}
+                      alt="Room preview"
+                      style={{ width: '100%', height: 'auto', display: 'block' }}
+                    />
+                  </div>
+                )}
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn-secondary flex items-center justify-center gap-2"
+                >
+                  <Camera className="w-5 h-5" />
+                  {imagePreview ? 'Replace image' : 'Take a photo'}
+                </button>
+              </div>
 
               {/* Room type question */}
               <div>
