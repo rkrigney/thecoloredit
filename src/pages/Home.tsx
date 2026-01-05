@@ -72,11 +72,11 @@ export default function Home() {
         <div className="flex gap-8 text-sm text-charcoal-lighter">
           <div className="flex items-center gap-2">
             <div className="w-1 h-1 rounded-full bg-sage" />
-            <span>83 curated colors</span>
+            <span>Matched to your room</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-1 h-1 rounded-full bg-sage" />
-            <span>Expert-backed</span>
+            <span>Undertone-safe picks</span>
           </div>
         </div>
       </div>
