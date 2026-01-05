@@ -69,11 +69,11 @@ export default function Home() {
         <div className="flex gap-6 mb-10 text-sm text-charcoal-lighter">
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-gold" />
-            <span>Button-driven</span>
+            <span>Matched to your room</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-gold" />
-            <span>Expert-backed</span>
+            <span>Undertone-safe picks</span>
           </div>
         </div>
       </div>
