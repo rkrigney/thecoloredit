@@ -176,30 +176,37 @@ function QuestionIllustration({
   panels: number
   selectedIndex: number
 }) {
-  // Calculate the horizontal position to show the correct panel
-  // Each panel is (100/panels)% of the image width
-  // Position so the selected panel is centered in view
-  const panelWidthPercent = 100 / panels
-  const positionX = (selectedIndex * panelWidthPercent) + (panelWidthPercent / 2)
+  // Container shows one panel at a time
+  // Image is scaled so each panel = container width
+  const containerWidth = 180
+  const containerHeight = 240
+
+  // Image width = container width * number of panels
+  // This makes each panel exactly container width
+  const imageWidth = containerWidth * panels
+
+  // Shift left by selectedIndex panels to show the correct one
+  const leftOffset = -selectedIndex * containerWidth
 
   return (
     <div className="mt-6 flex justify-center animate-pop-in">
       <div
-        className="rounded-lg shadow-md overflow-hidden"
+        className="rounded-lg shadow-md overflow-hidden bg-cream-100"
         style={{
-          width: '180px',
-          height: '220px',
+          width: containerWidth,
+          height: containerHeight,
+          position: 'relative',
         }}
       >
         <img
           src={src}
           alt=""
           style={{
-            width: `${panels * 100}%`,
+            position: 'absolute',
+            width: imageWidth,
             height: 'auto',
-            objectFit: 'cover',
-            objectPosition: `${positionX}% 85%`, // 85% to show bottom portion (skip header)
-            minHeight: '100%',
+            left: leftOffset,
+            bottom: 0, // Align to bottom to crop header text at top
           }}
         />
       </div>
@@ -390,15 +397,16 @@ export default function RoomSetup() {
                   </button>
                 </div>
               ) : (
-                <div className="relative">
+                <div className="relative bg-cream-100 rounded-lg p-2">
                   <img
                     src={imagePreview}
                     alt="Room preview"
-                    className="w-full max-h-64 object-contain rounded-lg"
+                    className="w-full rounded-lg"
+                    style={{ maxHeight: '280px', objectFit: 'contain' }}
                   />
                   <button
                     onClick={removeImage}
-                    className="absolute top-3 right-3 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
+                    className="absolute top-4 right-4 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
