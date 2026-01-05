@@ -148,14 +148,14 @@ function scoreVibe(
 // Score lighting safety (20 points max)
 function scoreLighting(
   color: PaintColor,
-  lightLevel: number,
+  lightLevel: UserRoomProfile['lightLevel'],
   vibe: UserRoomProfile['vibe']
 ): number {
   const lrv = color.lrv
 
-  // Convert slider (0-100) to low/medium/high
-  const isLowLight = lightLevel < 35
-  const isHighLight = lightLevel > 65
+  // Handle string-based light levels
+  const isLowLight = lightLevel === 'none' || lightLevel === 'low'
+  const isHighLight = lightLevel === 'lots'
 
   if (isLowLight) {
     // In low light, high LRV is safe. Low LRV is risky unless moody

@@ -5,6 +5,15 @@ import { useAppContext } from '../App'
 import { buildShortlist } from '../utils/recommendation'
 import { UserRoomProfile } from '../types'
 
+// Questionnaire illustrations
+import lightLevelImg from '../Gemini_Generated_Image_448gcm448gcm448g.png'
+import lightDirectionImg from '../Gemini_Generated_Image_kcf4oykcf4oykcf4.png'
+import bulbFeelImg from '../Gemini_Generated_Image_o3m6ddo3m6ddo3m6.png'
+import fixedElementsImg from '../Gemini_Generated_Image_en2c4sen2c4sen2c (1).png'
+import vibeImg from '../Gemini_Generated_Image_emwmtzemwmtzemwm.png'
+import boldnessImg from '../Gemini_Generated_Image_at79p6at79p6at79.png'
+import avoidImg from '../Gemini_Generated_Image_nh92wdnh92wdnh92.png'
+
 type Step = {
   id: string
   title: string
@@ -12,6 +21,12 @@ type Step = {
   type: 'single' | 'multi' | 'slider' | 'image_with_room' | 'avoid'
   options?: Array<{ label: string; value: string; subtitle?: string }>
   maxSelections?: number
+  illustration?: {
+    src: string
+    panels: number
+    // Maps option value to panel index (0-based, left to right)
+    panelMap: Record<string, number>
+  }
 }
 
 const steps: Step[] = [
@@ -24,7 +39,18 @@ const steps: Step[] = [
   {
     id: 'lightLevel',
     title: 'How much natural light does this room get?',
-    type: 'slider'
+    type: 'single',
+    options: [
+      { label: 'None (no windows)', value: 'none' },
+      { label: 'Low', value: 'low' },
+      { label: 'Medium', value: 'medium' },
+      { label: 'Lots', value: 'lots' }
+    ],
+    illustration: {
+      src: lightLevelImg,
+      panels: 4,
+      panelMap: { lots: 0, medium: 1, low: 2, none: 3 }
+    }
   },
   {
     id: 'lightDirection',
@@ -36,7 +62,12 @@ const steps: Step[] = [
       { label: 'Most of the day', value: 'south', subtitle: 'south' },
       { label: 'Mostly indirect/shaded', value: 'north', subtitle: 'north' },
       { label: 'Not sure / no windows', value: 'unknown' }
-    ]
+    ],
+    illustration: {
+      src: lightDirectionImg,
+      panels: 5,
+      panelMap: { east: 0, west: 1, south: 2, north: 3, unknown: 4 }
+    }
   },
   {
     id: 'bulbFeel',
@@ -47,7 +78,12 @@ const steps: Step[] = [
       { label: 'Neutral', value: 'neutral' },
       { label: 'Bright white', value: 'bright_white' },
       { label: 'Not sure / mixed', value: 'unknown' }
-    ]
+    ],
+    illustration: {
+      src: bulbFeelImg,
+      panels: 4,
+      panelMap: { warm: 0, neutral: 1, bright_white: 2, unknown: 3 }
+    }
   },
   {
     id: 'fixedElements',
@@ -58,7 +94,12 @@ const steps: Step[] = [
       { label: 'Warm', value: 'warm', subtitle: 'honey/orange wood, beige/tan, brass/gold fixtures, earthy finishes' },
       { label: 'Cool', value: 'cool', subtitle: 'gray wood/tile, blue-gray, chrome/nickel fixtures, crisp modern finishes' },
       { label: 'Mixed', value: 'mixed', subtitle: 'a little of everything' }
-    ]
+    ],
+    illustration: {
+      src: fixedElementsImg,
+      panels: 3,
+      panelMap: { warm: 0, cool: 1, mixed: 2 }
+    }
   },
   {
     id: 'vibe',
@@ -69,7 +110,12 @@ const steps: Step[] = [
       { label: 'Clean & crisp', value: 'clean_crisp' },
       { label: 'Calm & muted', value: 'calm_muted' },
       { label: 'Moody & dramatic', value: 'moody_dramatic' }
-    ]
+    ],
+    illustration: {
+      src: vibeImg,
+      panels: 4,
+      panelMap: { cozy_warm: 0, clean_crisp: 1, calm_muted: 2, moody_dramatic: 3 }
+    }
   },
   {
     id: 'boldness',
@@ -79,7 +125,12 @@ const steps: Step[] = [
       { label: 'Timeless', value: 'timeless', subtitle: 'easy to live with' },
       { label: 'A little color', value: 'a_little_color', subtitle: 'soft but noticeable' },
       { label: 'Statement', value: 'statement', subtitle: 'dramatic and daring' }
-    ]
+    ],
+    illustration: {
+      src: boldnessImg,
+      panels: 3,
+      panelMap: { timeless: 0, a_little_color: 1, statement: 2 }
+    }
   },
   {
     id: 'avoidList',
@@ -93,7 +144,12 @@ const steps: Step[] = [
       { label: 'Looking yellow/creamy', value: 'yellow_creamy' },
       { label: 'Feeling too dark', value: 'too_dark' },
       { label: 'Feeling too cold/icy', value: 'too_cold' }
-    ]
+    ],
+    illustration: {
+      src: avoidImg,
+      panels: 5,
+      panelMap: { green: 0, purple: 1, yellow_creamy: 2, too_dark: 3, too_cold: 4 }
+    }
   }
 ]
 
@@ -110,96 +166,38 @@ const roomOptions = [
   { label: 'Skip', value: 'skip' }
 ]
 
-// Sun animation component
-function SunSlider({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  // Calculate sun position and appearance based on slider value
-  const sunY = 100 - (value * 0.8) // Sun rises as value increases
-  const sunScale = 0.6 + (value / 100) * 0.6 // Sun gets bigger/brighter
-  const skyOpacity = value / 100 // Sky gets brighter
-  const rayCount = Math.floor(value / 15) + 2 // More rays as it gets brighter
+// Illustration component that crops and displays a single panel from the strip image
+function QuestionIllustration({
+  src,
+  panels,
+  selectedIndex
+}: {
+  src: string
+  panels: number
+  selectedIndex: number
+}) {
+  // Calculate the percentage width of each panel and offset
+  const panelWidthPercent = 100 / panels
+  const offsetPercent = selectedIndex * panelWidthPercent
 
   return (
-    <div className="space-y-8">
-      {/* Sun animation container */}
-      <div className="relative h-44 overflow-hidden transition-all duration-300"
-           style={{
-             background: `linear-gradient(to bottom,
-               hsl(${200 + value * 0.3}, ${20 + value * 0.5}%, ${15 + value * 0.6}%) 0%,
-               hsl(${40 + value * 0.2}, ${50 + value * 0.4}%, ${30 + value * 0.5}%) 100%)`
-           }}>
-        {/* Sun */}
-        <div
-          className="absolute left-1/2 -translate-x-1/2 transition-all duration-300 ease-out"
+    <div className="mt-6 flex justify-center animate-pop-in">
+      <div
+        className="relative overflow-hidden rounded-lg shadow-md"
+        style={{
+          width: `${Math.min(280, 100 / panels * 100)}px`,
+          aspectRatio: '1 / 1.2'
+        }}
+      >
+        <img
+          src={src}
+          alt=""
+          className="absolute h-full object-cover"
           style={{
-            bottom: `${sunY}%`,
-            transform: `translateX(-50%) scale(${sunScale})`
+            width: `${panels * 100}%`,
+            left: `-${offsetPercent * panels}%`,
+            objectPosition: 'top'
           }}
-        >
-          {/* Sun glow */}
-          <div
-            className="absolute inset-0 rounded-full blur-xl transition-opacity duration-300"
-            style={{
-              background: `radial-gradient(circle, rgba(255, 200, 100, ${0.3 + skyOpacity * 0.4}) 0%, transparent 70%)`,
-              width: '80px',
-              height: '80px',
-              marginLeft: '-20px',
-              marginTop: '-20px'
-            }}
-          />
-          {/* Sun body */}
-          <div
-            className="w-10 h-10 rounded-full transition-all duration-300"
-            style={{
-              background: `radial-gradient(circle,
-                hsl(45, 100%, ${70 + value * 0.2}%) 0%,
-                hsl(35, 100%, ${60 + value * 0.2}%) 100%)`,
-              boxShadow: `0 0 ${20 + value * 0.3}px ${5 + value * 0.1}px rgba(255, 200, 100, ${0.3 + skyOpacity * 0.5})`
-            }}
-          />
-          {/* Sun rays */}
-          {Array.from({ length: rayCount }).map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-0.5 bg-yellow-200/60 rounded-full origin-bottom"
-              style={{
-                height: `${12 + (value / 100) * 8}px`,
-                left: '50%',
-                bottom: '50%',
-                transform: `translateX(-50%) rotate(${(360 / rayCount) * i}deg) translateY(-24px)`,
-                opacity: 0.4 + skyOpacity * 0.4
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Ground/horizon line */}
-        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-charcoal/40 to-transparent" />
-      </div>
-
-      {/* Slider */}
-      <div className="px-2">
-        <div className="flex justify-between text-sm text-charcoal-light mb-4">
-          <span className="font-serif italic">None</span>
-          <span className="font-serif italic">Lots</span>
-        </div>
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-1.5 bg-cream-300 rounded-full appearance-none cursor-pointer
-                   [&::-webkit-slider-thumb]:appearance-none
-                   [&::-webkit-slider-thumb]:w-6
-                   [&::-webkit-slider-thumb]:h-6
-                   [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-sage
-                   [&::-webkit-slider-thumb]:shadow-md
-                   [&::-webkit-slider-thumb]:cursor-pointer
-                   [&::-webkit-slider-thumb]:border-2
-                   [&::-webkit-slider-thumb]:border-white
-                   [&::-webkit-slider-thumb]:transition-transform
-                   [&::-webkit-slider-thumb]:hover:scale-110"
         />
       </div>
     </div>
@@ -214,9 +212,9 @@ export default function RoomSetup() {
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [answers, setAnswers] = useState<Record<string, string | string[] | number>>({
+  const [answers, setAnswers] = useState<Record<string, string | string[]>>({
     roomType: '',
-    lightLevel: 50,
+    lightLevel: '',
     lightDirection: '',
     bulbFeel: '',
     fixedElements: '',
@@ -273,10 +271,6 @@ export default function RoomSetup() {
     }
   }
 
-  const handleSliderChange = (value: number) => {
-    setAnswers(prev => ({ ...prev, lightLevel: value }))
-  }
-
   const canProceed = () => {
     if (step.type === 'single') {
       return !!answers[step.id]
@@ -293,7 +287,7 @@ export default function RoomSetup() {
     // Build the profile from answers
     const profile: UserRoomProfile = {
       roomType: answers.roomType as UserRoomProfile['roomType'] || undefined,
-      lightLevel: answers.lightLevel as number,
+      lightLevel: answers.lightLevel as UserRoomProfile['lightLevel'],
       lightDirection: answers.lightDirection as UserRoomProfile['lightDirection'],
       bulbFeel: answers.bulbFeel as UserRoomProfile['bulbFeel'],
       fixedElements: answers.fixedElements as UserRoomProfile['fixedElements'],
@@ -396,7 +390,7 @@ export default function RoomSetup() {
                   <img
                     src={imagePreview}
                     alt="Room preview"
-                    className="w-full max-h-52 object-cover"
+                    className="w-full"
                   />
                   <button
                     onClick={removeImage}
@@ -425,73 +419,93 @@ export default function RoomSetup() {
             </div>
           )}
 
-          {/* Light level slider with sun animation */}
-          {step.type === 'slider' && (
-            <SunSlider
-              value={answers.lightLevel as number}
-              onChange={handleSliderChange}
-            />
-          )}
-
           {/* Single select options */}
           {step.type === 'single' && step.options && (
-            <div className="space-y-3">
-              {step.options.map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => handleSingleSelect(opt.value)}
-                  className={`w-full text-left p-5 border transition-all ${
-                    answers[step.id] === opt.value
-                      ? 'bg-sage text-cream-50 border-sage'
-                      : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
-                  }`}
-                >
-                  <span className="font-medium">{opt.label}</span>
-                  {opt.subtitle && (
-                    <span className={`block text-sm mt-1 ${
-                      answers[step.id] === opt.value ? 'text-cream-50/80' : 'text-charcoal-light'
-                    }`}>
-                      {opt.subtitle}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="space-y-3">
+                {step.options.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleSingleSelect(opt.value)}
+                    className={`w-full text-left p-5 border transition-all ${
+                      answers[step.id] === opt.value
+                        ? 'bg-sage text-cream-50 border-sage'
+                        : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
+                    }`}
+                  >
+                    <span className="font-medium">{opt.label}</span>
+                    {opt.subtitle && (
+                      <span className={`block text-sm mt-1 ${
+                        answers[step.id] === opt.value ? 'text-cream-50/80' : 'text-charcoal-light'
+                      }`}>
+                        {opt.subtitle}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Pop-in illustration for selected option */}
+              {step.illustration && answers[step.id] && (
+                <QuestionIllustration
+                  key={`${step.id}-${answers[step.id]}`}
+                  src={step.illustration.src}
+                  panels={step.illustration.panels}
+                  selectedIndex={step.illustration.panelMap[answers[step.id] as string]}
+                />
+              )}
+            </>
           )}
 
           {/* Avoid list (multi-select with limit) */}
           {step.type === 'avoid' && step.options && (
-            <div className="space-y-3">
-              {step.options.map(opt => {
-                const selected = ((answers.avoidList as string[]) || []).includes(opt.value)
-                const atLimit = ((answers.avoidList as string[]) || []).length >= (step.maxSelections || 2)
-                const disabled = !selected && atLimit
+            <>
+              <div className="space-y-3">
+                {step.options.map(opt => {
+                  const selected = ((answers.avoidList as string[]) || []).includes(opt.value)
+                  const atLimit = ((answers.avoidList as string[]) || []).length >= (step.maxSelections || 2)
+                  const disabled = !selected && atLimit
 
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => handleAvoidSelect(opt.value)}
-                    disabled={disabled}
-                    className={`w-full text-left p-5 border transition-all flex items-center gap-4 ${
-                      selected
-                        ? 'bg-sage text-cream-50 border-sage'
-                        : disabled
-                        ? 'bg-cream-100 text-charcoal-lighter border-cream-200 cursor-not-allowed'
-                        : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
-                    }`}
-                  >
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                      selected
-                        ? 'border-cream-50 bg-cream-50'
-                        : 'border-charcoal/30'
-                    }`}>
-                      {selected && <Check className="w-3 h-3 text-sage" />}
-                    </div>
-                    <span className="font-medium">{opt.label}</span>
-                  </button>
-                )
-              })}
-            </div>
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() => handleAvoidSelect(opt.value)}
+                      disabled={disabled}
+                      className={`w-full text-left p-5 border transition-all flex items-center gap-4 ${
+                        selected
+                          ? 'bg-sage text-cream-50 border-sage'
+                          : disabled
+                          ? 'bg-cream-100 text-charcoal-lighter border-cream-200 cursor-not-allowed'
+                          : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
+                      }`}
+                    >
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                        selected
+                          ? 'border-cream-50 bg-cream-50'
+                          : 'border-charcoal/30'
+                      }`}>
+                        {selected && <Check className="w-3 h-3 text-sage" />}
+                      </div>
+                      <span className="font-medium">{opt.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Pop-in illustrations for selected avoid options */}
+              {step.illustration && (answers.avoidList as string[]).length > 0 && (
+                <div className="flex justify-center gap-4 flex-wrap">
+                  {(answers.avoidList as string[]).map((value) => (
+                    <QuestionIllustration
+                      key={`avoid-${value}`}
+                      src={step.illustration!.src}
+                      panels={step.illustration!.panels}
+                      selectedIndex={step.illustration!.panelMap[value]}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
