@@ -1,9 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, ArrowRight, Check, Sparkles, Upload, Camera } from 'lucide-react'
 import { useAppContext } from '../App'
 import { buildShortlist } from '../utils/recommendation'
 import { UserRoomProfile } from '../types'
+import warmAndCozyIllustration from '../4-Warm-and-Cozy.png'
 
 type Step = {
   id: string
@@ -135,6 +136,16 @@ export default function RoomSetup() {
     avoidList: []
   })
 
+  // Track illustration visibility and animation completion
+  const [showIllustration, setShowIllustration] = useState(false)
+  const [illustrationReady, setIllustrationReady] = useState(false)
+
+  // Reset illustration state when step changes
+  useEffect(() => {
+    setShowIllustration(false)
+    setIllustrationReady(false)
+  }, [currentStep])
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -153,6 +164,17 @@ export default function RoomSetup() {
 
   const handleSingleSelect = (value: string) => {
     setAnswers(prev => ({ ...prev, [step.id]: value }))
+
+    // Special case: bulbFeel with "warm" selected - show illustration first
+    if (step.id === 'bulbFeel' && value === 'warm') {
+      // Trigger illustration pop-in
+      setTimeout(() => setShowIllustration(true), 200)
+      // Mark as ready after animation completes (500ms animation)
+      setTimeout(() => setIllustrationReady(true), 700)
+      // Don't auto-progress - wait for user to click continue
+      return
+    }
+
     if (!isLastStep) {
       setTimeout(() => setCurrentStep(prev => prev + 1), 200)
     }
@@ -279,6 +301,7 @@ export default function RoomSetup() {
                   <div
                     className="w-full border border-cream-300 bg-white overflow-hidden cursor-pointer hover:border-sage transition-all"
                     onClick={() => fileInputRef.current?.click()}
+                    style={{ maxWidth: '800px' }}
                   >
                     <img
                       src={imagePreview}
@@ -338,6 +361,33 @@ export default function RoomSetup() {
                   )}
                 </button>
               ))}
+
+              {/* Warm & Cozy Illustration - pops in when that option is selected */}
+              {step.id === 'bulbFeel' && showIllustration && (
+                <div
+                  className={`mt-6 transition-all duration-500 ease-out ${
+                    showIllustration ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
+                  }`}
+                >
+                  <img
+                    src={warmAndCozyIllustration}
+                    alt="Warm and cozy lighting illustration"
+                    className="w-full rounded-lg shadow-sm"
+                    style={{ maxWidth: '800px' }}
+                  />
+                </div>
+              )}
+
+              {/* Continue button appears beneath illustration when ready */}
+              {step.id === 'bulbFeel' && answers.bulbFeel === 'warm' && illustrationReady && (
+                <button
+                  onClick={() => setCurrentStep(prev => prev + 1)}
+                  className="btn-primary w-full flex items-center justify-center gap-2 mt-6"
+                >
+                  Continue
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              )}
             </div>
           )}
 
@@ -378,7 +428,8 @@ export default function RoomSetup() {
         </div>
       </div>
 
-      {/* Bottom CTA */}
+      {/* Bottom CTA - hidden when showing inline continue after illustration */}
+      {!(step.id === 'bulbFeel' && answers.bulbFeel === 'warm') && (
       <div className="px-6 pb-8 pt-4 safe-area-inset-bottom border-t border-cream-200 bg-cream-50">
         {isLastStep ? (
           <button
@@ -429,6 +480,7 @@ export default function RoomSetup() {
           </button>
         )}
       </div>
+      )}
     </div>
   )
 }

@@ -39,6 +39,7 @@ export default function Home() {
             src={welcomeIllustration}
             alt="Illustration of someone overwhelmed by paint color choices"
             className="w-full rounded-lg shadow-sm"
+            style={{ maxWidth: '800px' }}
           />
         </div>
 
