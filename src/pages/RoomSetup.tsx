@@ -176,25 +176,34 @@ function QuestionIllustration({
   panels: number
   selectedIndex: number
 }) {
-  // Display image at panels * 100% width so each panel = container width
-  // Shift left by selectedIndex * 100% to show the correct panel
-  // Shift up slightly to crop out the header text from the source image
+  // Container width for each panel
+  const containerWidth = 200
+  // Image is scaled so each panel equals container width
+  const imageWidth = containerWidth * panels
+  // Shift left to show the correct panel
+  const offsetX = selectedIndex * containerWidth
+  // Shift up to crop out the header (about 15% of image height)
+  // Image aspect ratio is roughly 2.5:1 (wide), so height ≈ imageWidth / 2.5
+  const estimatedImageHeight = imageWidth / 2.5
+  const headerCrop = estimatedImageHeight * 0.15
+
   return (
     <div className="mt-6 flex justify-center animate-pop-in">
       <div
-        className="rounded-lg shadow-md overflow-hidden"
+        className="rounded-lg shadow-md overflow-hidden relative"
         style={{
-          width: '200px',
-          height: '240px',
+          width: `${containerWidth}px`,
+          height: '220px',
         }}
       >
         <img
           src={src}
           alt=""
+          className="absolute"
           style={{
-            width: `${panels * 100}%`,
-            marginLeft: `-${selectedIndex * 100}%`,
-            marginTop: '-8%',
+            width: `${imageWidth}px`,
+            left: `-${offsetX}px`,
+            top: `-${headerCrop}px`,
           }}
         />
       </div>
