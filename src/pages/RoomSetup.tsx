@@ -230,7 +230,7 @@ export default function RoomSetup() {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50 flex flex-col">
+    <div className="min-h-screen bg-cream-50">
       {/* Header */}
       <header className="px-6 py-5 flex items-center justify-between border-b border-cream-200">
         <button
@@ -260,9 +260,9 @@ export default function RoomSetup() {
       </header>
 
       {/* Content */}
-      <div className="px-6 pt-8 pb-4 flex-1 flex flex-col overflow-y-auto">
+      <div className="px-6 pt-8 pb-10" style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Question */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h2 className="font-serif text-title text-charcoal mb-2">
             {step.title}
           </h2>
@@ -274,7 +274,7 @@ export default function RoomSetup() {
         </div>
 
         {/* Options */}
-        <div className="mb-4 flex-1">
+        <div className="mb-8">
           {/* Image upload with room type */}
           {step.type === 'image_with_room' && (
             <div className="space-y-8">
@@ -364,16 +364,12 @@ export default function RoomSetup() {
 
               {/* Warm & Cozy Illustration - pops in when that option is selected */}
               {step.id === 'bulbFeel' && showIllustration && (
-                <div
-                  className={`mt-6 transition-all duration-500 ease-out ${
-                    showIllustration ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-4 scale-95'
-                  }`}
-                >
+                <div className="mt-6 animate-pop-in">
                   <img
                     src={warmAndCozyIllustration}
                     alt="Warm and cozy lighting illustration"
-                    className="w-full rounded-lg shadow-sm"
-                    style={{ maxWidth: '800px' }}
+                    className="rounded-lg shadow-sm"
+                    style={{ maxWidth: '100%', maxHeight: '35vh', width: 'auto', height: 'auto' }}
                   />
                 </div>
               )}
@@ -426,61 +422,61 @@ export default function RoomSetup() {
             </div>
           )}
         </div>
-      </div>
 
-      {/* Bottom CTA - hidden when showing inline continue after illustration */}
-      {!(step.id === 'bulbFeel' && answers.bulbFeel === 'warm') && (
-      <div className="px-6 pb-8 pt-4 safe-area-inset-bottom border-t border-cream-200 bg-cream-50">
-        {isLastStep ? (
-          <button
-            onClick={handleGenerate}
-            disabled={!canProceed() || isGenerating}
-            className="btn-primary w-full flex items-center justify-center gap-3 disabled:opacity-50"
-          >
-            {isGenerating ? (
-              <>
-                <div className="w-5 h-5 border-2 border-cream-50/30 border-t-cream-50 rounded-full animate-spin" />
-                Creating your shortlist...
-              </>
+        {/* CTA Buttons - flow naturally beneath content */}
+        {!(step.id === 'bulbFeel' && answers.bulbFeel === 'warm') && (
+          <div className="space-y-3">
+            {isLastStep ? (
+              <button
+                onClick={handleGenerate}
+                disabled={!canProceed() || isGenerating}
+                className="btn-primary w-full flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-cream-50/30 border-t-cream-50 rounded-full animate-spin" />
+                    Creating your shortlist...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    Create my shortlist
+                  </>
+                )}
+              </button>
             ) : (
-              <>
-                <Sparkles className="w-5 h-5" />
-                Create my shortlist
-              </>
+              <button
+                onClick={() => setCurrentStep(prev => prev + 1)}
+                className="btn-primary w-full flex items-center justify-center gap-2"
+              >
+                {step.type === 'image_with_room' && imagePreview ? 'Looks great!' : 'Continue'}
+                <ArrowRight className="w-4 h-4" />
+              </button>
             )}
-          </button>
-        ) : (
-          <button
-            onClick={() => setCurrentStep(prev => prev + 1)}
-            className="btn-primary w-full flex items-center justify-center gap-2"
-          >
-            {step.type === 'image_with_room' && imagePreview ? 'Looks great!' : 'Continue'}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        )}
 
-        {step.type === 'avoid' && (
-          <button
-            onClick={() => {
-              setAnswers(prev => ({ ...prev, avoidList: [] }))
-              handleGenerate()
-            }}
-            className="btn-ghost w-full mt-3"
-          >
-            No concerns — let's see everything
-          </button>
-        )}
+            {step.type === 'avoid' && (
+              <button
+                onClick={() => {
+                  setAnswers(prev => ({ ...prev, avoidList: [] }))
+                  handleGenerate()
+                }}
+                className="btn-ghost w-full"
+              >
+                No concerns — let's see everything
+              </button>
+            )}
 
-        {step.type === 'image_with_room' && !imagePreview && (
-          <button
-            onClick={() => setCurrentStep(prev => prev + 1)}
-            className="btn-ghost w-full mt-3"
-          >
-            Skip for now
-          </button>
+            {step.type === 'image_with_room' && !imagePreview && (
+              <button
+                onClick={() => setCurrentStep(prev => prev + 1)}
+                className="btn-ghost w-full"
+              >
+                Skip for now
+              </button>
+            )}
+          </div>
         )}
       </div>
-      )}
     </div>
   )
 }
