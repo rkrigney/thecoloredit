@@ -11,49 +11,117 @@
   body {
     @apply bg-cream-50 text-charcoal font-sans;
   }
+
+  /* Refined typography defaults */
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
 }
 
 @layer components {
+  /* Primary button - sophisticated sage green */
   .btn-primary {
-    @apply w-full py-4 px-6 bg-charcoal text-cream-50 font-medium text-base rounded-full
-           transition-all duration-200 ease-out
-           hover:bg-charcoal-light active:scale-[0.98];
+    @apply py-4 px-8 bg-sage text-cream-50 font-medium text-base tracking-wide
+           transition-all duration-300 ease-out
+           hover:bg-sage-dark active:scale-[0.98];
   }
 
+  /* Secondary button - refined outline */
   .btn-secondary {
-    @apply w-full py-3 px-5 border border-charcoal/20 text-charcoal font-medium text-sm rounded-full
-           transition-all duration-200 ease-out
-           hover:border-charcoal/40 hover:bg-cream-100 active:scale-[0.98];
+    @apply py-3 px-6 border border-charcoal/20 text-charcoal font-medium text-sm tracking-wide
+           transition-all duration-300 ease-out
+           hover:border-sage hover:text-sage active:scale-[0.98];
   }
 
+  /* Tertiary/ghost button */
+  .btn-ghost {
+    @apply py-3 px-6 text-charcoal-light font-medium text-sm tracking-wide
+           transition-all duration-300 ease-out
+           hover:text-charcoal;
+  }
+
+  /* Pill buttons for selections */
   .btn-pill {
-    @apply py-2.5 px-5 border border-charcoal/15 text-charcoal text-sm rounded-full
-           transition-all duration-200 ease-out cursor-pointer
-           hover:border-charcoal/30 hover:bg-cream-100;
+    @apply py-3 px-6 border border-charcoal/15 text-charcoal text-sm tracking-wide
+           transition-all duration-300 ease-out cursor-pointer
+           hover:border-sage/50 hover:bg-sage-50;
   }
 
   .btn-pill-selected {
-    @apply py-2.5 px-5 bg-charcoal text-cream-50 text-sm rounded-full
-           transition-all duration-200 ease-out cursor-pointer;
+    @apply py-3 px-6 bg-sage text-cream-50 text-sm tracking-wide
+           transition-all duration-300 ease-out cursor-pointer
+           shadow-sm;
   }
 
+  /* Chip components */
   .chip {
-    @apply inline-flex items-center gap-2 py-2 px-4 border border-charcoal/15 text-charcoal text-sm rounded-full
-           transition-all duration-200 ease-out cursor-pointer
-           hover:border-charcoal/30 hover:bg-cream-100;
+    @apply inline-flex items-center gap-2 py-2.5 px-5 border border-charcoal/15 text-charcoal text-sm
+           transition-all duration-300 ease-out cursor-pointer
+           hover:border-sage/50 hover:bg-sage-50;
   }
 
   .chip-selected {
-    @apply inline-flex items-center gap-2 py-2 px-4 bg-charcoal text-cream-50 text-sm rounded-full
-           transition-all duration-200 ease-out cursor-pointer;
+    @apply inline-flex items-center gap-2 py-2.5 px-5 bg-sage text-cream-50 text-sm
+           transition-all duration-300 ease-out cursor-pointer
+           shadow-sm;
   }
 
+  /* Cards - refined shadows and borders */
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-charcoal/5 overflow-hidden;
+    @apply bg-white border border-cream-200 overflow-hidden
+           shadow-[0_2px_8px_rgba(0,0,0,0.04)];
   }
 
   .card-elevated {
-    @apply bg-white rounded-2xl shadow-md border border-charcoal/5 overflow-hidden;
+    @apply bg-white border border-cream-200 overflow-hidden
+           shadow-[0_4px_20px_rgba(0,0,0,0.06)];
+  }
+
+  /* Page header */
+  .page-header {
+    @apply sticky top-0 bg-cream-50/95 backdrop-blur-sm z-10
+           px-6 py-5 border-b border-cream-200;
+  }
+
+  /* Section headings */
+  .section-label {
+    @apply text-xs font-medium text-charcoal-lighter uppercase tracking-widest;
+  }
+
+  /* Elegant divider */
+  .divider {
+    @apply h-px bg-gradient-to-r from-transparent via-cream-300 to-transparent;
+  }
+
+  /* Link styling */
+  .link {
+    @apply text-sage hover:text-sage-dark underline underline-offset-4
+           decoration-sage/30 hover:decoration-sage/60 transition-colors;
+  }
+
+  /* Input fields */
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-cream-200
+           text-charcoal placeholder-charcoal-lighter
+           focus:outline-none focus:border-sage focus:ring-1 focus:ring-sage/20
+           transition-all duration-200;
+  }
+
+  /* Badge styles */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 text-xs font-medium tracking-wide;
+  }
+
+  .badge-sage {
+    @apply badge bg-sage-50 text-sage border border-sage/20;
+  }
+
+  .badge-gold {
+    @apply badge bg-gold/10 text-gold-dark border border-gold/20;
+  }
+
+  .badge-blush {
+    @apply badge bg-blush-light/50 text-blush-dark border border-blush/20;
   }
 }
 
@@ -65,12 +133,22 @@
   .safe-area-inset-top {
     padding-top: env(safe-area-inset-top, 0);
   }
+
+  /* Editorial text treatments */
+  .text-editorial {
+    @apply font-serif italic text-charcoal-light;
+  }
+
+  /* Subtle hover lift */
+  .hover-lift {
+    @apply transition-transform duration-300 ease-out hover:-translate-y-0.5;
+  }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - refined */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -78,12 +156,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(44, 44, 44, 0.2);
-  border-radius: 3px;
+  background: rgba(91, 107, 90, 0.25);
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(44, 44, 44, 0.3);
+  background: rgba(91, 107, 90, 0.4);
 }
 
 /* Hide scrollbar for mobile */
@@ -91,4 +169,10 @@
   ::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Selection color */
+::selection {
+  background: rgba(91, 107, 90, 0.2);
+  color: #2D2D2D;
 }

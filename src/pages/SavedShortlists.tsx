@@ -40,13 +40,14 @@ export default function SavedShortlists() {
       const shortlistData = JSON.parse(savedShortlist.shortlistData) as ScoredColor[]
       setShortlist(shortlistData)
       setProfile({
-        roomType: savedShortlist.roomType as 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'nursery',
-        lighting: { direction: 'unknown', primaryUsage: 'both', bulbTemp: 'unknown' },
-        fixedElements: [],
-        vibe: { cozyToCrisp: 50, calmToMoody: 50 },
-        undertoneFears: [],
-        brandPreferences: [],
-        depthPreference: 'any'
+        roomType: savedShortlist.roomType as 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'kids' | 'dining' | 'other' | 'skip',
+        lightLevel: 50,
+        lightDirection: 'unknown',
+        bulbFeel: 'unknown',
+        fixedElements: 'mixed',
+        vibe: 'calm_muted',
+        boldness: 'timeless',
+        avoidList: []
       })
       navigate('/shortlist')
     } catch (err) {
@@ -90,9 +91,12 @@ export default function SavedShortlists() {
     bedroom: 'Bedroom',
     kitchen: 'Kitchen',
     bathroom: 'Bathroom',
-    hallway: 'Hallway',
-    office: 'Home office',
-    nursery: 'Nursery'
+    hallway: 'Hall / entry',
+    office: 'Office',
+    kids: "Kids' room",
+    dining: 'Dining room',
+    other: 'Room',
+    skip: 'Room'
   }
 
   const hasCurrentSession = currentShortlist.length > 0
@@ -100,7 +104,7 @@ export default function SavedShortlists() {
   return (
     <div className="min-h-screen bg-cream-50 pb-8">
       {/* Header */}
-      <header className="sticky top-0 bg-cream-50/95 backdrop-blur-sm z-10 px-4 py-4 border-b border-charcoal/5">
+      <header className="page-header">
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate(-1)}
@@ -108,7 +112,7 @@ export default function SavedShortlists() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="font-serif text-lg text-charcoal">Saved Shortlists</h1>
+          <h1 className="font-serif text-title text-charcoal">Saved Shortlists</h1>
           <div className="w-9" />
         </div>
       </header>
@@ -123,7 +127,7 @@ export default function SavedShortlists() {
             </h2>
             <button
               onClick={() => navigate('/shortlist')}
-              className="w-full bg-gradient-to-br from-gold/10 to-gold/5 border-2 border-gold/30 rounded-xl p-4 text-left hover:border-gold/50 transition-colors"
+              className="w-full bg-sage-50 border border-sage/30 p-5 text-left hover:border-sage/50 transition-colors"
             >
               <div className="flex items-start justify-between mb-3">
                 <div>
@@ -134,7 +138,7 @@ export default function SavedShortlists() {
                     {currentShortlist.length} colors · Unsaved
                   </p>
                 </div>
-                <span className="text-xs bg-gold/20 text-gold px-2 py-1 rounded-full">
+                <span className="badge-sage">
                   Active
                 </span>
               </div>
@@ -143,13 +147,13 @@ export default function SavedShortlists() {
                 {currentShortlist.slice(0, 6).map((scored, i) => (
                   <div
                     key={i}
-                    className="w-11 h-11 rounded-lg shadow-sm ring-1 ring-black/5"
+                    className="w-11 h-11 shadow-sm border border-cream-200"
                     style={{ backgroundColor: scored.color.hex }}
                     title={scored.color.name}
                   />
                 ))}
                 {currentShortlist.length > 6 && (
-                  <div className="w-11 h-11 rounded-lg bg-charcoal/10 flex items-center justify-center text-xs text-charcoal-light">
+                  <div className="w-11 h-11 bg-cream-100 flex items-center justify-center text-xs text-charcoal-light border border-cream-200">
                     +{currentShortlist.length - 6}
                   </div>
                 )}
@@ -177,8 +181,8 @@ export default function SavedShortlists() {
               <p className="text-red-400 text-xs">Please try refreshing the page</p>
             </div>
           ) : userShortlists.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-xl border border-charcoal/5">
-              <Palette className="w-10 h-10 text-charcoal/15 mx-auto mb-3" />
+            <div className="text-center py-12 bg-white border border-cream-200">
+              <Palette className="w-10 h-10 text-charcoal-lighter mx-auto mb-3" />
               <p className="text-charcoal-light text-sm mb-1">No saved shortlists yet</p>
               <p className="text-charcoal-lighter text-xs mb-4">
                 Save your shortlists to access them anytime
@@ -205,11 +209,11 @@ export default function SavedShortlists() {
                 return (
                   <div
                     key={saved.id}
-                    className="bg-white rounded-xl border border-charcoal/10 overflow-hidden shadow-sm"
+                    className="bg-white border border-cream-200 overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
                   >
                     <button
                       onClick={() => handleLoad(saved)}
-                      className="w-full p-4 text-left hover:bg-cream-50 transition-colors"
+                      className="w-full p-5 text-left hover:bg-sage-50 transition-colors"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div>
@@ -228,20 +232,20 @@ export default function SavedShortlists() {
                         {colors.slice(0, 6).map((scored, i) => (
                           <div
                             key={i}
-                            className="w-11 h-11 rounded-lg shadow-sm ring-1 ring-black/5"
+                            className="w-11 h-11 shadow-sm border border-cream-200"
                             style={{ backgroundColor: scored.color?.hex || '#ccc' }}
                             title={scored.color?.name}
                           />
                         ))}
                         {colors.length > 6 && (
-                          <div className="w-11 h-11 rounded-lg bg-charcoal/10 flex items-center justify-center text-xs text-charcoal-light">
+                          <div className="w-11 h-11 bg-cream-100 flex items-center justify-center text-xs text-charcoal-light border border-cream-200">
                             +{colors.length - 6}
                           </div>
                         )}
                       </div>
                     </button>
 
-                    <div className="border-t border-charcoal/5 px-4 py-2 flex justify-between items-center bg-cream-50/50">
+                    <div className="border-t border-cream-200 px-5 py-3 flex justify-between items-center bg-cream-50">
                       <span className="text-xs text-charcoal-lighter">Tap to load</span>
                       <button
                         onClick={(e) => {

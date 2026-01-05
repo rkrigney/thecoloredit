@@ -21,9 +21,10 @@ export interface PaintColor {
   rgb: { r: number; g: number; b: number }
   lab: Lab
   lrv: number
+  chroma: number // Color saturation/intensity for boldness scoring
   undertone: Undertone
   stability: number
-  depthCategory: 'light' | 'mid' | 'dark'
+  depthCategory: 'light' | 'mid' | 'dark' | 'very_deep'
   popularity: number
   tags: string[]
   description: string
@@ -35,31 +36,25 @@ export interface PaintColor {
 }
 
 export interface UserRoomProfile {
-  roomType: 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'nursery'
-  lighting: {
-    direction: 'north' | 'south' | 'east' | 'west' | 'unknown'
-    primaryUsage: 'day' | 'night' | 'both'
-    bulbTemp: 'warm' | 'neutral' | 'cool' | 'unknown'
-  }
-  fixedElements: string[]
-  vibe: {
-    cozyToCrisp: number
-    calmToMoody: number
-  }
-  undertoneFears: string[]
-  brandPreferences: string[]
-  depthPreference: 'light' | 'mid' | 'dark' | 'any'
+  roomType?: 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'kids' | 'dining' | 'other' | 'skip'
+  lightLevel: number // 0-100 slider (none to lots)
+  lightDirection: 'east' | 'west' | 'south' | 'north' | 'unknown'
+  bulbFeel: 'warm' | 'neutral' | 'bright_white' | 'unknown'
+  fixedElements: 'warm' | 'cool' | 'mixed'
+  vibe: 'cozy_warm' | 'clean_crisp' | 'calm_muted' | 'moody_dramatic'
+  boldness: 'timeless' | 'a_little_color' | 'statement'
+  avoidList: Array<'green' | 'purple' | 'yellow_creamy' | 'too_dark' | 'too_cold'>
 }
 
 export interface ScoredColor {
   color: PaintColor
-  tag: 'safe_win' | 'vibe_match' | 'wildcard'
+  tag: 'top_pick' | 'safe_bet' | 'bold_choice'
   scores: {
     overall: number
-    vibeMatch: number
-    lightingTolerance: number
-    undertoneSafety: number
-    depthMatch: number
+    boldness: number    // 35 points max
+    vibe: number        // 25 points max
+    lighting: number    // 20 points max
+    harmony: number     // 20 points max
   }
   reasoning: string
   suggestedTrim: {
