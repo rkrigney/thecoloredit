@@ -295,7 +295,7 @@ export default function Shortlist() {
       )}
 
       {/* Color Cards */}
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4" style={{ maxWidth: '800px', margin: '0 auto' }}>
         {shortlist.map(scored => (
           <ColorCard
             key={scored.color.id}

@@ -36,7 +36,7 @@ export default function LightingSlider({ imageUrl, colorName }: LightingSliderPr
   return (
     <div className="relative w-full">
       {/* Image Stack - Three layers: neutral base, warm overlay, cool overlay */}
-      <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-t-xl" style={{ maxHeight: '50vh' }}>
         {/* Base layer - Neutral (original image) */}
         <img
           src={imageUrl}
