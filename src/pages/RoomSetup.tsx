@@ -5,15 +5,6 @@ import { useAppContext } from '../App'
 import { buildShortlist } from '../utils/recommendation'
 import { UserRoomProfile } from '../types'
 
-// Questionnaire illustrations
-import lightLevelImg from '../Gemini_Generated_Image_448gcm448gcm448g.png'
-import lightDirectionImg from '../Gemini_Generated_Image_kcf4oykcf4oykcf4.png'
-import bulbFeelImg from '../Gemini_Generated_Image_o3m6ddo3m6ddo3m6.png'
-import fixedElementsImg from '../Gemini_Generated_Image_en2c4sen2c4sen2c (1).png'
-import vibeImg from '../Gemini_Generated_Image_emwmtzemwmtzemwm.png'
-import boldnessImg from '../Gemini_Generated_Image_at79p6at79p6at79.png'
-import avoidImg from '../Gemini_Generated_Image_nh92wdnh92wdnh92.png'
-
 type Step = {
   id: string
   title: string
@@ -21,12 +12,6 @@ type Step = {
   type: 'single' | 'multi' | 'slider' | 'image_with_room' | 'avoid'
   options?: Array<{ label: string; value: string; subtitle?: string }>
   maxSelections?: number
-  illustration?: {
-    src: string
-    panels: number
-    // Maps option value to panel index (0-based, left to right)
-    panelMap: Record<string, number>
-  }
 }
 
 const steps: Step[] = [
@@ -45,12 +30,7 @@ const steps: Step[] = [
       { label: 'Low', value: 'low' },
       { label: 'Medium', value: 'medium' },
       { label: 'Lots', value: 'lots' }
-    ],
-    illustration: {
-      src: lightLevelImg,
-      panels: 4,
-      panelMap: { lots: 0, medium: 1, low: 2, none: 3 }
-    }
+    ]
   },
   {
     id: 'lightDirection',
@@ -62,12 +42,7 @@ const steps: Step[] = [
       { label: 'Most of the day', value: 'south', subtitle: 'south' },
       { label: 'Mostly indirect/shaded', value: 'north', subtitle: 'north' },
       { label: 'Not sure / no windows', value: 'unknown' }
-    ],
-    illustration: {
-      src: lightDirectionImg,
-      panels: 5,
-      panelMap: { east: 0, west: 1, south: 2, north: 3, unknown: 4 }
-    }
+    ]
   },
   {
     id: 'bulbFeel',
@@ -78,12 +53,7 @@ const steps: Step[] = [
       { label: 'Neutral', value: 'neutral' },
       { label: 'Bright white', value: 'bright_white' },
       { label: 'Not sure / mixed', value: 'unknown' }
-    ],
-    illustration: {
-      src: bulbFeelImg,
-      panels: 4,
-      panelMap: { warm: 0, neutral: 1, bright_white: 2, unknown: 3 }
-    }
+    ]
   },
   {
     id: 'fixedElements',
@@ -94,12 +64,7 @@ const steps: Step[] = [
       { label: 'Warm', value: 'warm', subtitle: 'honey/orange wood, beige/tan, brass/gold fixtures, earthy finishes' },
       { label: 'Cool', value: 'cool', subtitle: 'gray wood/tile, blue-gray, chrome/nickel fixtures, crisp modern finishes' },
       { label: 'Mixed', value: 'mixed', subtitle: 'a little of everything' }
-    ],
-    illustration: {
-      src: fixedElementsImg,
-      panels: 3,
-      panelMap: { warm: 0, cool: 1, mixed: 2 }
-    }
+    ]
   },
   {
     id: 'vibe',
@@ -110,12 +75,7 @@ const steps: Step[] = [
       { label: 'Clean & crisp', value: 'clean_crisp' },
       { label: 'Calm & muted', value: 'calm_muted' },
       { label: 'Moody & dramatic', value: 'moody_dramatic' }
-    ],
-    illustration: {
-      src: vibeImg,
-      panels: 4,
-      panelMap: { cozy_warm: 0, clean_crisp: 1, calm_muted: 2, moody_dramatic: 3 }
-    }
+    ]
   },
   {
     id: 'boldness',
@@ -125,12 +85,7 @@ const steps: Step[] = [
       { label: 'Timeless', value: 'timeless', subtitle: 'easy to live with' },
       { label: 'A little color', value: 'a_little_color', subtitle: 'soft but noticeable' },
       { label: 'Statement', value: 'statement', subtitle: 'dramatic and daring' }
-    ],
-    illustration: {
-      src: boldnessImg,
-      panels: 3,
-      panelMap: { timeless: 0, a_little_color: 1, statement: 2 }
-    }
+    ]
   },
   {
     id: 'avoidList',
@@ -144,12 +99,7 @@ const steps: Step[] = [
       { label: 'Looking yellow/creamy', value: 'yellow_creamy' },
       { label: 'Feeling too dark', value: 'too_dark' },
       { label: 'Feeling too cold/icy', value: 'too_cold' }
-    ],
-    illustration: {
-      src: avoidImg,
-      panels: 5,
-      panelMap: { green: 0, purple: 1, yellow_creamy: 2, too_dark: 3, too_cold: 4 }
-    }
+    ]
   }
 ]
 
@@ -165,40 +115,6 @@ const roomOptions = [
   { label: 'Other', value: 'other' },
   { label: 'Skip', value: 'skip' }
 ]
-
-// Illustration component that crops and displays a single panel from the strip image
-function QuestionIllustration({
-  src,
-  panels,
-  selectedIndex
-}: {
-  src: string
-  panels: number
-  selectedIndex: number
-}) {
-  // Use background-image for reliable cropping
-  // backgroundSize: (panels * 100)% makes image N times container width
-  // backgroundPosition X%: 0% shows leftmost, 100% shows rightmost
-  // For panel i of n: posX = i / (n-1) * 100
-  const positionX = panels > 1 ? (selectedIndex / (panels - 1)) * 100 : 50
-
-  return (
-    <div className="mt-6 flex justify-center animate-pop-in">
-      <div
-        className="rounded-lg shadow-md"
-        style={{
-          width: 180,
-          height: 220,
-          backgroundImage: `url(${src})`,
-          backgroundSize: `${panels * 100}% auto`,
-          backgroundPosition: `${positionX}% 100%`,
-          backgroundRepeat: 'no-repeat',
-          backgroundColor: '#f5f3ef',
-        }}
-      />
-    </div>
-  )
-}
 
 export default function RoomSetup() {
   const navigate = useNavigate()
@@ -245,8 +161,7 @@ export default function RoomSetup() {
 
   const handleSingleSelect = (value: string) => {
     setAnswers(prev => ({ ...prev, [step.id]: value }))
-    // Don't auto-advance if this step has an illustration - user will click Continue
-    if (!isLastStep && !step.illustration) {
+    if (!isLastStep) {
       setTimeout(() => setCurrentStep(prev => prev + 1), 200)
     }
   }
@@ -260,10 +175,8 @@ export default function RoomSetup() {
     const maxSelections = step.maxSelections || 2
 
     if (current.includes(value)) {
-      // Remove if already selected
       setAnswers(prev => ({ ...prev, avoidList: current.filter(v => v !== value) }))
     } else if (current.length < maxSelections) {
-      // Add if under limit
       setAnswers(prev => ({ ...prev, avoidList: [...current, value] }))
     }
   }
@@ -273,7 +186,7 @@ export default function RoomSetup() {
       return !!answers[step.id]
     }
     if (step.type === 'avoid') {
-      return true // Avoid list is optional
+      return true
     }
     return true
   }
@@ -281,7 +194,6 @@ export default function RoomSetup() {
   const handleGenerate = async () => {
     setIsGenerating(true)
 
-    // Build the profile from answers
     const profile: UserRoomProfile = {
       roomType: answers.roomType as UserRoomProfile['roomType'] || undefined,
       lightLevel: answers.lightLevel as UserRoomProfile['lightLevel'],
@@ -295,11 +207,9 @@ export default function RoomSetup() {
 
     setProfile(profile)
 
-    // Generate shortlist
     const results = buildShortlist(profile)
     setShortlist(results)
 
-    // Simulate processing time for premium feel
     await new Promise(resolve => setTimeout(resolve, 1500))
 
     navigate('/shortlist')
@@ -332,7 +242,7 @@ export default function RoomSetup() {
           ))}
         </div>
 
-        <div className="w-9" /> {/* Spacer */}
+        <div className="w-9" />
       </header>
 
       {/* Content */}
@@ -383,16 +293,15 @@ export default function RoomSetup() {
                   </button>
                 </div>
               ) : (
-                <div className="relative inline-block w-full">
+                <div className="relative">
                   <img
                     src={imagePreview}
                     alt="Room preview"
-                    className="w-full h-auto rounded-lg border border-cream-200"
-                    style={{ maxHeight: '300px', objectFit: 'contain', display: 'block' }}
+                    className="w-full h-auto rounded-lg"
                   />
                   <button
                     onClick={removeImage}
-                    className="absolute top-2 right-2 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
+                    className="absolute top-3 right-3 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -419,91 +328,63 @@ export default function RoomSetup() {
 
           {/* Single select options */}
           {step.type === 'single' && step.options && (
-            <>
-              <div className="space-y-3">
-                {step.options.map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => handleSingleSelect(opt.value)}
-                    className={`w-full text-left p-5 border transition-all ${
-                      answers[step.id] === opt.value
-                        ? 'bg-sage text-cream-50 border-sage'
-                        : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
-                    }`}
-                  >
-                    <span className="font-medium">{opt.label}</span>
-                    {opt.subtitle && (
-                      <span className={`block text-sm mt-1 ${
-                        answers[step.id] === opt.value ? 'text-cream-50/80' : 'text-charcoal-light'
-                      }`}>
-                        {opt.subtitle}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-
-              {/* Pop-in illustration for selected option */}
-              {step.illustration && answers[step.id] && (
-                <QuestionIllustration
-                  key={`${step.id}-${answers[step.id]}`}
-                  src={step.illustration.src}
-                  panels={step.illustration.panels}
-                  selectedIndex={step.illustration.panelMap[answers[step.id] as string]}
-                />
-              )}
-            </>
+            <div className="space-y-3">
+              {step.options.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleSingleSelect(opt.value)}
+                  className={`w-full text-left p-5 border transition-all ${
+                    answers[step.id] === opt.value
+                      ? 'bg-sage text-cream-50 border-sage'
+                      : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
+                  }`}
+                >
+                  <span className="font-medium">{opt.label}</span>
+                  {opt.subtitle && (
+                    <span className={`block text-sm mt-1 ${
+                      answers[step.id] === opt.value ? 'text-cream-50/80' : 'text-charcoal-light'
+                    }`}>
+                      {opt.subtitle}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           )}
 
           {/* Avoid list (multi-select with limit) */}
           {step.type === 'avoid' && step.options && (
-            <>
-              <div className="space-y-3">
-                {step.options.map(opt => {
-                  const selected = ((answers.avoidList as string[]) || []).includes(opt.value)
-                  const atLimit = ((answers.avoidList as string[]) || []).length >= (step.maxSelections || 2)
-                  const disabled = !selected && atLimit
+            <div className="space-y-3">
+              {step.options.map(opt => {
+                const selected = ((answers.avoidList as string[]) || []).includes(opt.value)
+                const atLimit = ((answers.avoidList as string[]) || []).length >= (step.maxSelections || 2)
+                const disabled = !selected && atLimit
 
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() => handleAvoidSelect(opt.value)}
-                      disabled={disabled}
-                      className={`w-full text-left p-5 border transition-all flex items-center gap-4 ${
-                        selected
-                          ? 'bg-sage text-cream-50 border-sage'
-                          : disabled
-                          ? 'bg-cream-100 text-charcoal-lighter border-cream-200 cursor-not-allowed'
-                          : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
-                      }`}
-                    >
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                        selected
-                          ? 'border-cream-50 bg-cream-50'
-                          : 'border-charcoal/30'
-                      }`}>
-                        {selected && <Check className="w-3 h-3 text-sage" />}
-                      </div>
-                      <span className="font-medium">{opt.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Pop-in illustrations for selected avoid options */}
-              {step.illustration && (answers.avoidList as string[]).length > 0 && (
-                <div className="flex justify-center gap-4 flex-wrap">
-                  {(answers.avoidList as string[]).map((value) => (
-                    <QuestionIllustration
-                      key={`avoid-${value}`}
-                      src={step.illustration!.src}
-                      panels={step.illustration!.panels}
-                      selectedIndex={step.illustration!.panelMap[value]}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => handleAvoidSelect(opt.value)}
+                    disabled={disabled}
+                    className={`w-full text-left p-5 border transition-all flex items-center gap-4 ${
+                      selected
+                        ? 'bg-sage text-cream-50 border-sage'
+                        : disabled
+                        ? 'bg-cream-100 text-charcoal-lighter border-cream-200 cursor-not-allowed'
+                        : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
+                    }`}
+                  >
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                      selected
+                        ? 'border-cream-50 bg-cream-50'
+                        : 'border-charcoal/30'
+                    }`}>
+                      {selected && <Check className="w-3 h-3 text-sage" />}
+                    </div>
+                    <span className="font-medium">{opt.label}</span>
+                  </button>
+                )
+              })}
+            </div>
           )}
         </div>
       </div>
