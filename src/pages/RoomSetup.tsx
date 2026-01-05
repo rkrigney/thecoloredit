@@ -176,30 +176,23 @@ function QuestionIllustration({
   panels: number
   selectedIndex: number
 }) {
-  // Calculate the percentage width of each panel and offset
-  const panelWidthPercent = 100 / panels
-  const offsetPercent = selectedIndex * panelWidthPercent
+  // Use background-position to show only the selected panel
+  // 0% = leftmost panel, 100% = rightmost panel
+  const positionPercent = panels > 1 ? (selectedIndex / (panels - 1)) * 100 : 0
 
   return (
     <div className="mt-6 flex justify-center animate-pop-in">
       <div
-        className="relative overflow-hidden rounded-lg shadow-md"
+        className="rounded-lg shadow-md"
         style={{
-          width: `${Math.min(280, 100 / panels * 100)}px`,
-          aspectRatio: '1 / 1.2'
+          width: '240px',
+          height: '280px',
+          backgroundImage: `url(${src})`,
+          backgroundSize: `${panels * 100}% auto`,
+          backgroundPosition: `${positionPercent}% top`,
+          backgroundRepeat: 'no-repeat'
         }}
-      >
-        <img
-          src={src}
-          alt=""
-          className="absolute h-full object-cover"
-          style={{
-            width: `${panels * 100}%`,
-            left: `-${offsetPercent * panels}%`,
-            objectPosition: 'top'
-          }}
-        />
-      </div>
+      />
     </div>
   )
 }
@@ -249,7 +242,8 @@ export default function RoomSetup() {
 
   const handleSingleSelect = (value: string) => {
     setAnswers(prev => ({ ...prev, [step.id]: value }))
-    if (!isLastStep) {
+    // Don't auto-advance if this step has an illustration - user will click Continue
+    if (!isLastStep && !step.illustration) {
       setTimeout(() => setCurrentStep(prev => prev + 1), 200)
     }
   }
