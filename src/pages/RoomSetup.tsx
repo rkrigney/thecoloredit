@@ -176,40 +176,26 @@ function QuestionIllustration({
   panels: number
   selectedIndex: number
 }) {
-  // Container shows one panel at a time
-  // Image is scaled so each panel = container width
-  const containerWidth = 180
-  const containerHeight = 240
-
-  // Image width = container width * number of panels
-  // This makes each panel exactly container width
-  const imageWidth = containerWidth * panels
-
-  // Shift left by selectedIndex panels to show the correct one
-  const leftOffset = -selectedIndex * containerWidth
+  // Use background-image for reliable cropping
+  // backgroundSize: (panels * 100)% makes image N times container width
+  // backgroundPosition X%: 0% shows leftmost, 100% shows rightmost
+  // For panel i of n: posX = i / (n-1) * 100
+  const positionX = panels > 1 ? (selectedIndex / (panels - 1)) * 100 : 50
 
   return (
     <div className="mt-6 flex justify-center animate-pop-in">
       <div
-        className="rounded-lg shadow-md overflow-hidden bg-cream-100"
+        className="rounded-lg shadow-md"
         style={{
-          width: containerWidth,
-          height: containerHeight,
-          position: 'relative',
+          width: 180,
+          height: 220,
+          backgroundImage: `url(${src})`,
+          backgroundSize: `${panels * 100}% auto`,
+          backgroundPosition: `${positionX}% 100%`,
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#f5f3ef',
         }}
-      >
-        <img
-          src={src}
-          alt=""
-          style={{
-            position: 'absolute',
-            width: imageWidth,
-            height: 'auto',
-            left: leftOffset,
-            bottom: 0, // Align to bottom to crop header text at top
-          }}
-        />
-      </div>
+      />
     </div>
   )
 }
@@ -397,16 +383,16 @@ export default function RoomSetup() {
                   </button>
                 </div>
               ) : (
-                <div className="relative bg-cream-100 rounded-lg p-2">
+                <div className="relative inline-block w-full">
                   <img
                     src={imagePreview}
                     alt="Room preview"
-                    className="w-full rounded-lg"
-                    style={{ maxHeight: '280px', objectFit: 'contain' }}
+                    className="w-full h-auto rounded-lg border border-cream-200"
+                    style={{ maxHeight: '300px', objectFit: 'contain', display: 'block' }}
                   />
                   <button
                     onClick={removeImage}
-                    className="absolute top-4 right-4 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
+                    className="absolute top-2 right-2 p-2 bg-charcoal/80 text-white rounded-full hover:bg-charcoal transition-colors"
                   >
                     <X className="w-4 h-4" />
                   </button>
