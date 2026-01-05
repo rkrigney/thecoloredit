@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Sparkles } from 'lucide-react'
+import welcomeIllustration from '../Gemini_Generated_Image_welcome.png'
 
 // Injected at build time by Vite
 declare const __BUILD_TIME__: string
@@ -34,27 +35,12 @@ export default function Home() {
           </h1>
         </div>
 
-        {/* Hero Visual - Elegant color story */}
-        <div className="mb-16 flex items-end gap-2">
-          <div
-            className="w-14 h-20 shadow-sm"
-            style={{ backgroundColor: '#D5CEC4' }}
-          />
-          <div
-            className="w-14 h-28 shadow-sm"
-            style={{ backgroundColor: '#B8AFA3' }}
-          />
-          <div
-            className="w-14 h-24 shadow-sm"
-            style={{ backgroundColor: '#C9C5BD' }}
-          />
-          <div
-            className="w-14 h-32 shadow-sm"
-            style={{ backgroundColor: '#A8B5A3' }}
-          />
-          <div
-            className="w-14 h-20 shadow-sm"
-            style={{ backgroundColor: '#D4C4B5' }}
+        {/* Welcome Illustration */}
+        <div className="mb-12">
+          <img
+            src={welcomeIllustration}
+            alt="Illustration of someone overwhelmed by paint color choices"
+            className="w-full rounded-lg shadow-sm"
           />
         </div>
 

@@ -41,7 +41,7 @@ export default function SavedShortlists() {
       setShortlist(shortlistData)
       setProfile({
         roomType: savedShortlist.roomType as 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'kids' | 'dining' | 'other' | 'skip',
-        lightLevel: 50,
+        lightLevel: 'medium',
         lightDirection: 'unknown',
         bulbFeel: 'unknown',
         fixedElements: 'mixed',

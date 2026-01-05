@@ -37,7 +37,7 @@ export interface PaintColor {
 
 export interface UserRoomProfile {
   roomType?: 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'kids' | 'dining' | 'other' | 'skip'
-  lightLevel: number // 0-100 slider (none to lots)
+  lightLevel: 'none' | 'low' | 'medium' | 'lots'
   lightDirection: 'east' | 'west' | 'south' | 'north' | 'unknown'
   bulbFeel: 'warm' | 'neutral' | 'bright_white' | 'unknown'
   fixedElements: 'warm' | 'cool' | 'mixed'
