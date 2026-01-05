@@ -1,159 +1,324 @@
 import { PaintColor, UserRoomProfile, ScoredColor } from '../types'
 import { paintColors, trimColors } from '../data/colors'
 
-// Compute vibe match score
-function computeVibeMatch(color: PaintColor, vibe: { cozyToCrisp: number; calmToMoody: number }): number {
-  const { lab, lrv } = color
-  const chroma = Math.sqrt(lab.a ** 2 + lab.b ** 2)
-  const warmth = lab.a * 0.6 + lab.b * 0.4
+/**
+ * The Color Edit Weighted Algorithm
+ *
+ * This system sums up to 100 Points:
+ * - Boldness (Chroma): 35 points
+ * - Vibe (Depth & Temp): 25 points
+ * - Lighting (LRV): 20 points
+ * - Harmony (Direction): 20 points
+ * - Avoid List: Kill switch (0%)
+ */
 
-  // Temperature match
-  let tempMatch: number
-  if (vibe.cozyToCrisp < 50) {
-    tempMatch = (warmth + 10) / 20
-  } else {
-    tempMatch = (-warmth + 10) / 20
-  }
-  tempMatch = Math.max(0, Math.min(1, tempMatch))
-
-  // Mood match
-  let moodMatch: number
-  if (vibe.calmToMoody < 50) {
-    moodMatch = (1 - chroma / 30) * 0.5 + (lrv / 100) * 0.5
-  } else {
-    moodMatch = (chroma / 30) * 0.3 + (1 - lrv / 100) * 0.7
-  }
-  moodMatch = Math.max(0, Math.min(1, moodMatch))
-
-  return (tempMatch + moodMatch) / 2
-}
-
-// Compute lighting tolerance score
-function computeLightingTolerance(
+// Check if color should be killed by avoid list
+function isKilledByAvoidList(
   color: PaintColor,
-  lighting: UserRoomProfile['lighting']
-): number {
-  const { stability } = color
+  avoidList: UserRoomProfile['avoidList']
+): { killed: boolean; reason: string } {
+  const tags = color.tags.join(' ').toLowerCase()
+  const watchOut = color.watchOut.toLowerCase()
+  const undertone = color.undertone
 
-  const uncertaintyFactors = [
-    lighting.direction === 'unknown',
-    lighting.bulbTemp === 'unknown',
-    lighting.primaryUsage === 'both'
-  ]
-  const uncertainty = uncertaintyFactors.filter(Boolean).length / 3
+  for (const avoid of avoidList) {
+    switch (avoid) {
+      case 'green':
+        if (
+          undertone.leansPrimary === 'green' ||
+          undertone.leansSecondary === 'green' ||
+          watchOut.includes('green') ||
+          tags.includes('green')
+        ) {
+          return { killed: true, reason: 'Has green undertones you wanted to avoid' }
+        }
+        break
 
-  const baseTolerance = stability
-  const uncertaintyPenalty = uncertainty * (1 - stability) * 0.3
+      case 'purple':
+        if (
+          undertone.leansPrimary === 'purple' ||
+          undertone.leansSecondary === 'purple' ||
+          watchOut.includes('purple') ||
+          tags.includes('purple')
+        ) {
+          return { killed: true, reason: 'Has purple undertones you wanted to avoid' }
+        }
+        break
 
-  return Math.max(0.3, baseTolerance - uncertaintyPenalty)
-}
+      case 'yellow_creamy':
+        if (
+          undertone.leansPrimary === 'yellow' ||
+          watchOut.includes('yellow') ||
+          watchOut.includes('creamy') ||
+          watchOut.includes('cream')
+        ) {
+          return { killed: true, reason: 'Has yellow/creamy undertones you wanted to avoid' }
+        }
+        break
 
-// Compute undertone safety score
-function computeUndertoneSafety(
-  undertone: PaintColor['undertone'],
-  fears: string[]
-): number {
-  const fearMapping: Record<string, string> = {
-    fear_green: 'green',
-    fear_pink: 'pink',
-    fear_purple: 'purple',
-    fear_babyblue: 'blue',
-    fear_dingy: 'neutral',
-    fear_yellow: 'yellow'
-  }
+      case 'too_dark':
+        if (color.lrv < 25) {
+          return { killed: true, reason: 'Too dark for your preference' }
+        }
+        break
 
-  if (fears.length === 0) return 1.0
-
-  let penalty = 0
-  for (const fear of fears) {
-    const fearedUndertone = fearMapping[fear]
-    if (fearedUndertone === undertone.leansPrimary) {
-      penalty += 0.5
-    } else if (fearedUndertone === undertone.leansSecondary) {
-      penalty += 0.25
+      case 'too_cold':
+        if (
+          undertone.temperature === 'cool' &&
+          (undertone.leansPrimary === 'blue' || tags.includes('icy'))
+        ) {
+          return { killed: true, reason: 'Too cold/icy for your preference' }
+        }
+        break
     }
   }
 
-  return Math.max(0.2, 1.0 - penalty)
+  return { killed: false, reason: '' }
 }
 
-// Compute depth match score
-function computeDepthMatch(
-  colorDepth: 'light' | 'mid' | 'dark',
-  preference: 'light' | 'mid' | 'dark' | 'any'
+// Score boldness (35 points max)
+function scoreBoldness(
+  color: PaintColor,
+  boldness: UserRoomProfile['boldness']
 ): number {
-  if (preference === 'any') return 0.8
-  if (colorDepth === preference) return 1.0
+  const chroma = color.chroma
 
-  const adjacent: Record<string, number> = {
-    'light-mid': 0.6,
-    'mid-light': 0.6,
-    'mid-dark': 0.6,
-    'dark-mid': 0.6,
-    'light-dark': 0.3,
-    'dark-light': 0.3
+  switch (boldness) {
+    case 'timeless':
+      // Want low saturation colors
+      if (chroma < 12) return 35       // Perfect match
+      if (chroma < 18) return 15       // Okay, but maybe too colorful
+      return 0                         // Too bold
+
+    case 'a_little_color':
+      // Want moderate saturation
+      if (chroma >= 12 && chroma <= 30) return 35
+      if (chroma < 12) return 10       // Too boring?
+      return 10                        // Too bold?
+
+    case 'statement':
+      // Want high saturation
+      if (chroma > 30) return 35
+      if (chroma > 20) return 20
+      return 0                         // Too boring
+
+    default:
+      return 17 // Middle ground
   }
-
-  return adjacent[`${colorDepth}-${preference}`] ?? 0.5
 }
 
-// Filter by brand preferences
-function filterByBrand(colors: PaintColor[], preferences: string[]): PaintColor[] {
-  if (preferences.length === 0 || preferences.includes('any')) {
-    return colors
+// Score vibe (25 points max)
+function scoreVibe(
+  color: PaintColor,
+  vibe: UserRoomProfile['vibe']
+): number {
+  const depth = color.depthCategory
+  const temp = color.undertone.temperature
+  let score = 0
+
+  switch (vibe) {
+    case 'moody_dramatic':
+      if (depth === 'very_deep' || depth === 'dark') score += 25
+      else if (depth === 'mid') score += 10
+      break
+
+    case 'clean_crisp':
+      if (depth === 'light') score += 20
+      if (temp === 'cool') score += 5 // Bonus for crisp cool tones
+      break
+
+    case 'cozy_warm':
+      if (temp === 'warm') score += 25
+      else if (temp === 'neutral') score += 15
+      break
+
+    case 'calm_muted':
+      // Low chroma + mid-light depth
+      if (color.chroma < 15 && (depth === 'light' || depth === 'mid')) score += 25
+      else if (color.chroma < 20) score += 15
+      break
+
+    default:
+      score = 12
   }
-  return colors.filter(c => preferences.includes(c.brandId))
+
+  return Math.min(25, score)
 }
 
-// Generate reasoning text
+// Score lighting safety (20 points max)
+function scoreLighting(
+  color: PaintColor,
+  lightLevel: number,
+  vibe: UserRoomProfile['vibe']
+): number {
+  const lrv = color.lrv
+
+  // Convert slider (0-100) to low/medium/high
+  const isLowLight = lightLevel < 35
+  const isHighLight = lightLevel > 65
+
+  if (isLowLight) {
+    // In low light, high LRV is safe. Low LRV is risky unless moody
+    if (vibe === 'moody_dramatic') {
+      return 20 // They want dark in dark, that's fine
+    }
+
+    if (lrv > 50) return 20
+    if (lrv > 30) return 10
+    return 0 // Too dark for this room
+  }
+
+  if (isHighLight) {
+    // Lots of light? Anything goes, but very light colors might wash out
+    if (lrv > 75) return 15 // Might look too washed out
+    return 20
+  }
+
+  // Medium light - balanced
+  return 18
+}
+
+// Score harmony/direction (20 points max)
+function scoreHarmony(
+  color: PaintColor,
+  direction: UserRoomProfile['lightDirection'],
+  fixedElements: UserRoomProfile['fixedElements']
+): number {
+  const temp = color.undertone.temperature
+  let score = 0
+
+  // Direction-based scoring
+  switch (direction) {
+    case 'north':
+      // North light is cool - warm colors help balance
+      if (temp === 'warm') score += 12
+      else if (temp === 'neutral') score += 8
+      else score += 2 // Cool might feel icy
+      break
+
+    case 'south':
+      // South light is warm - cool/neutral colors balance
+      if (temp === 'cool' || temp === 'neutral') score += 12
+      else score += 8 // Warm is fine, just more intense
+      break
+
+    case 'east':
+      // Morning light is cooler - warm colors work
+      if (temp === 'warm') score += 10
+      else score += 8
+      break
+
+    case 'west':
+      // Afternoon light is warm - any temp works
+      score += 10
+      break
+
+    default:
+      score += 8
+  }
+
+  // Fixed elements harmony
+  switch (fixedElements) {
+    case 'warm':
+      if (temp === 'warm') score += 8
+      else if (temp === 'neutral') score += 5
+      else score += 2
+      break
+
+    case 'cool':
+      if (temp === 'cool') score += 8
+      else if (temp === 'neutral') score += 5
+      else score += 2
+      break
+
+    case 'mixed':
+      if (temp === 'neutral') score += 8
+      else score += 5
+      break
+  }
+
+  return Math.min(20, score)
+}
+
+// Main scoring function
+function computeOverallScore(
+  color: PaintColor,
+  profile: UserRoomProfile
+): ScoredColor['scores'] {
+  const boldnessScore = scoreBoldness(color, profile.boldness)
+  const vibeScore = scoreVibe(color, profile.vibe)
+  const lightingScore = scoreLighting(color, profile.lightLevel, profile.vibe)
+  const harmonyScore = scoreHarmony(color, profile.lightDirection, profile.fixedElements)
+
+  const overall = boldnessScore + vibeScore + lightingScore + harmonyScore
+
+  return {
+    overall,
+    boldness: boldnessScore,
+    vibe: vibeScore,
+    lighting: lightingScore,
+    harmony: harmonyScore
+  }
+}
+
+// Generate reasoning text based on scores
 function generateReasoning(
   color: PaintColor,
   profile: UserRoomProfile,
   scores: ScoredColor['scores']
 ): string {
-  const reasons: string[] = []
+  const parts: string[] = []
 
-  // Vibe reasoning
-  if (scores.vibeMatch > 0.8) {
-    if (profile.vibe.cozyToCrisp < 40) {
-      reasons.push('warm, cozy feel')
-    } else if (profile.vibe.cozyToCrisp > 60) {
-      reasons.push('crisp, clean aesthetic')
+  // Boldness reasoning
+  if (scores.boldness >= 30) {
+    if (profile.boldness === 'timeless') {
+      parts.push('perfectly timeless')
+    } else if (profile.boldness === 'statement') {
+      parts.push('makes a bold statement')
+    } else {
+      parts.push('just the right amount of color')
     }
   }
 
-  // Undertone safety
-  if (profile.undertoneFears.length > 0 && scores.undertoneSafety > 0.8) {
-    reasons.push('avoids the undertones you flagged')
+  // Vibe reasoning
+  if (scores.vibe >= 20) {
+    const vibeNames: Record<string, string> = {
+      cozy_warm: 'cozy, warm feel',
+      clean_crisp: 'clean, crisp aesthetic',
+      calm_muted: 'calm, relaxed vibe',
+      moody_dramatic: 'moody depth'
+    }
+    parts.push(vibeNames[profile.vibe] || 'great vibe match')
   }
 
-  // Fixed elements
-  if (profile.fixedElements.includes('wood_warm') && color.undertone.temperature === 'warm') {
-    reasons.push('complements your warm wood')
-  }
-  if (profile.fixedElements.includes('hardware_brass') && color.undertone.temperature === 'warm') {
-    reasons.push('pairs well with brass')
-  }
-  if (profile.fixedElements.includes('hardware_chrome') && color.undertone.temperature !== 'warm') {
-    reasons.push('works with chrome hardware')
-  }
-
-  // Stability
-  if (scores.lightingTolerance > 0.85) {
-    reasons.push('stable in varying light')
+  // Harmony reasoning
+  if (scores.harmony >= 15) {
+    if (profile.lightDirection === 'north' && color.undertone.temperature === 'warm') {
+      parts.push('balances your north-facing light')
+    } else if (profile.fixedElements === 'warm' && color.undertone.temperature === 'warm') {
+      parts.push('harmonizes with your warm elements')
+    } else if (profile.fixedElements === 'cool' && color.undertone.temperature === 'cool') {
+      parts.push('complements your cool finishes')
+    }
   }
 
-  if (reasons.length === 0) {
-    reasons.push('balanced undertones and good versatility')
+  // Lighting reasoning
+  if (scores.lighting >= 18) {
+    parts.push('works great with your light')
   }
 
-  return reasons.slice(0, 2).join(', ').replace(/^./, s => s.toUpperCase()) + '.'
+  if (parts.length === 0) {
+    parts.push('versatile and well-balanced')
+  }
+
+  // Format as sentence
+  const reasonText = parts.slice(0, 2).join(' and ')
+  return `${scores.overall}% Match — ${reasonText.charAt(0).toUpperCase() + reasonText.slice(1)}.`
 }
 
 // Recommend trim colors
 function recommendTrim(
-  wallColor: PaintColor,
-  _vibe: { cozyToCrisp: number }
+  wallColor: PaintColor
 ): { crisp: PaintColor | null; warm: PaintColor | null } {
   const wallUndertone = wallColor.undertone
 
@@ -167,14 +332,14 @@ function recommendTrim(
     t.undertone.leansPrimary !== wallUndertone.leansPrimary
   )
 
-  const warmOption = warmWhites.sort((a, b) => b.popularity - a.popularity)[0] || null
-  const crispOption = crispWhites.sort((a, b) => b.popularity - a.popularity)[0] || null
+  const warmOption = warmWhites.sort((a, b) => b.popularity - a.popularity)[0] || trimColors[0] || null
+  const crispOption = crispWhites.sort((a, b) => b.popularity - a.popularity)[0] || trimColors[0] || null
 
   return { crisp: crispOption, warm: warmOption }
 }
 
-// Recommend finish
-function recommendFinish(roomType: string): string {
+// Recommend finish based on room type
+function recommendFinish(roomType?: UserRoomProfile['roomType']): string {
   const finishMap: Record<string, string> = {
     bathroom: 'Satin',
     kitchen: 'Eggshell',
@@ -183,86 +348,57 @@ function recommendFinish(roomType: string): string {
     living: 'Eggshell',
     bedroom: 'Matte',
     office: 'Eggshell',
-    exterior: 'Satin'
+    kids: 'Eggshell',
+    dining: 'Eggshell',
+    other: 'Eggshell'
   }
-  return finishMap[roomType] || 'Eggshell'
-}
-
-// Main scoring function
-function computeOverallScore(
-  color: PaintColor,
-  profile: UserRoomProfile
-): ScoredColor['scores'] {
-  const weights = {
-    vibe: 0.25,
-    lighting: 0.20,
-    undertone: 0.20,
-    depth: 0.10,
-    trend: 0.25
-  }
-
-  const vibeMatch = computeVibeMatch(color, profile.vibe)
-  const lightingTolerance = computeLightingTolerance(color, profile.lighting)
-  const undertoneSafety = computeUndertoneSafety(color.undertone, profile.undertoneFears)
-  const depthMatch = computeDepthMatch(color.depthCategory, profile.depthPreference)
-
-  const overall =
-    weights.vibe * vibeMatch +
-    weights.lighting * lightingTolerance +
-    weights.undertone * undertoneSafety +
-    weights.depth * depthMatch +
-    weights.trend * color.popularity
-
-  return {
-    overall: Math.round(overall * 100),
-    vibeMatch,
-    lightingTolerance,
-    undertoneSafety,
-    depthMatch
-  }
+  return roomType ? finishMap[roomType] || 'Eggshell' : 'Eggshell'
 }
 
 // Build the shortlist
 export function buildShortlist(profile: UserRoomProfile): ScoredColor[] {
-  // Filter by brand and depth preferences
-  let candidates = filterByBrand(paintColors, profile.brandPreferences)
+  // Score all colors
+  const scored: Array<{
+    color: PaintColor
+    scores: ScoredColor['scores']
+    killed: boolean
+    killReason: string
+  }> = paintColors.map(color => {
+    const killCheck = isKilledByAvoidList(color, profile.avoidList)
 
-  // Filter by depth if specified
-  if (profile.depthPreference !== 'any') {
-    const depthCandidates = candidates.filter(c => c.depthCategory === profile.depthPreference)
-    if (depthCandidates.length >= 10) {
-      candidates = depthCandidates
+    if (killCheck.killed) {
+      return {
+        color,
+        scores: { overall: 0, boldness: 0, vibe: 0, lighting: 0, harmony: 0 },
+        killed: true,
+        killReason: killCheck.reason
+      }
     }
-  }
 
-  // Exclude trim-only colors
-  candidates = candidates.filter(c => !c.tags.includes('trim') || c.tags.length > 1)
+    return {
+      color,
+      scores: computeOverallScore(color, profile),
+      killed: false,
+      killReason: ''
+    }
+  })
 
-  // Score all candidates
-  const scored = candidates.map(color => ({
-    color,
-    scores: computeOverallScore(color, profile)
-  }))
-
-  // Sort by overall score
-  scored.sort((a, b) => b.scores.overall - a.scores.overall)
+  // Filter out killed colors and sort by overall score
+  const viable = scored
+    .filter(s => !s.killed)
+    .sort((a, b) => b.scores.overall - a.scores.overall)
 
   const shortlist: ScoredColor[] = []
   const usedIds = new Set<string>()
 
-  // Pick 2 Safe Wins (high stability + undertone safety)
-  const safeCandidates = scored.filter(
-    s =>
-      s.scores.lightingTolerance >= 0.75 &&
-      s.scores.undertoneSafety >= 0.8 &&
-      !usedIds.has(s.color.id)
-  )
-
-  for (const candidate of safeCandidates.slice(0, 2)) {
-    const trim = recommendTrim(candidate.color, profile.vibe)
+  // Top picks - highest overall scores
+  const topPicks = viable.slice(0, 2)
+  for (const candidate of topPicks) {
+    const trim = recommendTrim(candidate.color)
     shortlist.push({
-      ...candidate,
-      tag: 'safe_win',
+      color: candidate.color,
+      scores: candidate.scores,
+      tag: 'top_pick',
       reasoning: generateReasoning(candidate.color, profile, candidate.scores),
       suggestedTrim: trim,
       suggestedFinish: recommendFinish(profile.roomType)
@@ -270,16 +406,18 @@ export function buildShortlist(profile: UserRoomProfile): ScoredColor[] {
     usedIds.add(candidate.color.id)
   }
 
-  // Pick 2 Vibe Matches (highest vibe match)
-  const vibeCandidates = scored
+  // Safe bets - high lighting + harmony scores (stable colors)
+  const safeBets = viable
     .filter(s => !usedIds.has(s.color.id))
-    .sort((a, b) => b.scores.vibeMatch - a.scores.vibeMatch)
+    .filter(s => s.scores.lighting >= 15 && s.scores.harmony >= 12)
+    .slice(0, 2)
 
-  for (const candidate of vibeCandidates.slice(0, 2)) {
-    const trim = recommendTrim(candidate.color, profile.vibe)
+  for (const candidate of safeBets) {
+    const trim = recommendTrim(candidate.color)
     shortlist.push({
-      ...candidate,
-      tag: 'vibe_match',
+      color: candidate.color,
+      scores: candidate.scores,
+      tag: 'safe_bet',
       reasoning: generateReasoning(candidate.color, profile, candidate.scores),
       suggestedTrim: trim,
       suggestedFinish: recommendFinish(profile.roomType)
@@ -287,24 +425,39 @@ export function buildShortlist(profile: UserRoomProfile): ScoredColor[] {
     usedIds.add(candidate.color.id)
   }
 
-  // Pick 1 Wildcard (high vibe, slightly lower safety)
-  const wildcardCandidates = scored.filter(
-    s =>
-      !usedIds.has(s.color.id) &&
-      s.scores.vibeMatch >= 0.6 &&
-      s.scores.undertoneSafety >= 0.5
-  )
+  // Bold choice - higher boldness score, still good overall
+  const boldChoices = viable
+    .filter(s => !usedIds.has(s.color.id))
+    .filter(s => s.scores.boldness >= 20 && s.scores.overall >= 50)
+    .slice(0, 1)
 
-  if (wildcardCandidates.length > 0) {
-    const candidate = wildcardCandidates[0]
-    const trim = recommendTrim(candidate.color, profile.vibe)
+  for (const candidate of boldChoices) {
+    const trim = recommendTrim(candidate.color)
     shortlist.push({
-      ...candidate,
-      tag: 'wildcard',
-      reasoning: 'A bit bolder — adds personality while staying within your comfort zone.',
+      color: candidate.color,
+      scores: candidate.scores,
+      tag: 'bold_choice',
+      reasoning: `${candidate.scores.overall}% Match — A bolder option that still works beautifully in your space.`,
       suggestedTrim: trim,
       suggestedFinish: recommendFinish(profile.roomType)
     })
+    usedIds.add(candidate.color.id)
+  }
+
+  // If we don't have 5 yet, fill with next best
+  const remaining = viable.filter(s => !usedIds.has(s.color.id))
+  while (shortlist.length < 5 && remaining.length > 0) {
+    const candidate = remaining.shift()!
+    const trim = recommendTrim(candidate.color)
+    shortlist.push({
+      color: candidate.color,
+      scores: candidate.scores,
+      tag: 'safe_bet',
+      reasoning: generateReasoning(candidate.color, profile, candidate.scores),
+      suggestedTrim: trim,
+      suggestedFinish: recommendFinish(profile.roomType)
+    })
+    usedIds.add(candidate.color.id)
   }
 
   return shortlist.slice(0, 5)
@@ -325,42 +478,52 @@ export function generateSamplingPlan(
     'On the main wall at eye level'
   ]
 
+  const bulbDesc = profile.bulbFeel === 'warm' ? 'warm' : profile.bulbFeel === 'bright_white' ? 'bright' : 'regular'
   const timesToCheck = [
     'Morning with natural light',
     'Afternoon at peak brightness',
-    `Evening with your ${profile.lighting.bulbTemp === 'warm' ? 'warm' : 'regular'} bulbs on`
+    `Evening with your ${bulbDesc} bulbs on`
   ]
 
-  // Generate alternates based on undertone fears
+  // Generate alternates based on avoid list
   const alternates: Array<{ ifLooksToo: string; tryInstead: string[] }> = []
 
-  if (profile.undertoneFears.includes('fear_pink')) {
-    const alternatives = colors
-      .filter(c => c.color.undertone.leansPrimary !== 'pink')
-      .slice(0, 2)
-      .map(c => c.color.name)
-    if (alternatives.length > 0) {
-      alternates.push({ ifLooksToo: 'pink', tryInstead: alternatives })
-    }
-  }
+  for (const avoid of profile.avoidList) {
+    let description = ''
+    let filterFn: (c: ScoredColor) => boolean
 
-  if (profile.undertoneFears.includes('fear_green')) {
-    const alternatives = colors
-      .filter(c => c.color.undertone.leansPrimary !== 'green')
-      .slice(0, 2)
-      .map(c => c.color.name)
-    if (alternatives.length > 0) {
-      alternates.push({ ifLooksToo: 'green', tryInstead: alternatives })
+    switch (avoid) {
+      case 'green':
+        description = 'green'
+        filterFn = c => c.color.undertone.leansPrimary !== 'green'
+        break
+      case 'purple':
+        description = 'purple'
+        filterFn = c => c.color.undertone.leansPrimary !== 'purple'
+        break
+      case 'yellow_creamy':
+        description = 'yellow/creamy'
+        filterFn = c => c.color.undertone.leansPrimary !== 'yellow'
+        break
+      case 'too_dark':
+        description = 'dark'
+        filterFn = c => c.color.lrv > 40
+        break
+      case 'too_cold':
+        description = 'cold'
+        filterFn = c => c.color.undertone.temperature !== 'cool'
+        break
+      default:
+        continue
     }
-  }
 
-  if (profile.undertoneFears.includes('fear_yellow')) {
     const alternatives = colors
-      .filter(c => c.color.undertone.leansPrimary !== 'yellow')
+      .filter(filterFn)
       .slice(0, 2)
       .map(c => c.color.name)
+
     if (alternatives.length > 0) {
-      alternates.push({ ifLooksToo: 'yellow', tryInstead: alternatives })
+      alternates.push({ ifLooksToo: description, tryInstead: alternatives })
     }
   }
 

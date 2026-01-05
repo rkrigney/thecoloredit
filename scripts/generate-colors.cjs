@@ -242,11 +242,18 @@ function calculateStability(undertones, riskTags, lrv) {
   return Math.max(0.4, Math.min(0.95, Math.round(stability * 100) / 100))
 }
 
-// Determine depth category from LRV
+// Determine depth category from LRV (matches Salma's Depth_bin)
 function getDepthCategory(lrv) {
   if (lrv >= 50) return 'light'
   if (lrv >= 20) return 'mid'
-  return 'dark'
+  if (lrv >= 10) return 'dark'
+  return 'very_deep'
+}
+
+// Calculate chroma (color saturation) from LAB values
+function calculateChroma(lab) {
+  // Chroma = sqrt(a² + b²) in LAB space
+  return Math.round(Math.sqrt(lab.a * lab.a + lab.b * lab.b) * 10) / 10
 }
 
 // Generate bestIn recommendations based on color properties
@@ -505,6 +512,7 @@ rows.forEach((row, index) => {
     rgb: { r, g, b },
     lab,
     lrv,
+    chroma: calculateChroma(lab),
     undertone: {
       temperature: mapTemperature(temp),
       leansPrimary: undertones.primary,

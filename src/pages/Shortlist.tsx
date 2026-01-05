@@ -8,9 +8,9 @@ import LightingSlider from '../components/LightingSlider'
 import SaveShortlistButton from '../components/SaveShortlistButton'
 
 const tagLabels: Record<string, { label: string; bg: string; text: string }> = {
-  safe_win: { label: 'Safe Win', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  vibe_match: { label: 'Vibe Match', bg: 'bg-violet-50', text: 'text-violet-700' },
-  wildcard: { label: 'Wildcard', bg: 'bg-amber-50', text: 'text-amber-700' }
+  top_pick: { label: 'Top Pick', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  safe_bet: { label: 'Safe Bet', bg: 'bg-sky-50', text: 'text-sky-700' },
+  bold_choice: { label: 'Bold Choice', bg: 'bg-amber-50', text: 'text-amber-700' }
 }
 
 function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCompare: () => void; roomImage: string | null }) {
@@ -238,9 +238,12 @@ export default function Shortlist() {
     bedroom: 'Bedroom',
     kitchen: 'Kitchen',
     bathroom: 'Bathroom',
-    hallway: 'Hallway',
-    office: 'Home office',
-    nursery: 'Nursery'
+    hallway: 'Hall / entry',
+    office: 'Office',
+    kids: "Kids' room",
+    dining: 'Dining room',
+    other: 'Room',
+    skip: 'Room'
   }
 
   const handleCompare = (scored: ScoredColor) => {
@@ -269,7 +272,7 @@ export default function Shortlist() {
           </button>
           <div className="text-center">
             <h1 className="font-serif text-lg text-charcoal">Your Shortlist</h1>
-            <p className="text-xs text-charcoal-light">{roomTypeLabels[profile.roomType]}</p>
+            <p className="text-xs text-charcoal-light">{profile.roomType ? roomTypeLabels[profile.roomType] : 'Your space'}</p>
           </div>
           <SaveShortlistButton shortlist={shortlist} profile={profile} />
         </div>
