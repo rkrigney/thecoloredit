@@ -40,13 +40,14 @@ export default function SavedShortlists() {
       const shortlistData = JSON.parse(savedShortlist.shortlistData) as ScoredColor[]
       setShortlist(shortlistData)
       setProfile({
-        roomType: savedShortlist.roomType as 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'nursery',
-        lighting: { direction: 'unknown', primaryUsage: 'both', bulbTemp: 'unknown' },
-        fixedElements: [],
-        vibe: { cozyToCrisp: 50, calmToMoody: 50 },
-        undertoneFears: [],
-        brandPreferences: [],
-        depthPreference: 'any'
+        roomType: savedShortlist.roomType as 'living' | 'bedroom' | 'kitchen' | 'bathroom' | 'hallway' | 'office' | 'kids' | 'dining' | 'other' | 'skip',
+        lightLevel: 50,
+        lightDirection: 'unknown',
+        bulbFeel: 'unknown',
+        fixedElements: 'mixed',
+        vibe: 'calm_muted',
+        boldness: 'timeless',
+        avoidList: []
       })
       navigate('/shortlist')
     } catch (err) {
@@ -90,9 +91,12 @@ export default function SavedShortlists() {
     bedroom: 'Bedroom',
     kitchen: 'Kitchen',
     bathroom: 'Bathroom',
-    hallway: 'Hallway',
-    office: 'Home office',
-    nursery: 'Nursery'
+    hallway: 'Hall / entry',
+    office: 'Office',
+    kids: "Kids' room",
+    dining: 'Dining room',
+    other: 'Room',
+    skip: 'Room'
   }
 
   const hasCurrentSession = currentShortlist.length > 0

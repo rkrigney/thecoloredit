@@ -20,6 +20,7 @@ export const paintColors: PaintColor[] = [
       b: -0.2
     },
     lrv: 14,
+    chroma: 8.3,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -81,6 +82,7 @@ export const paintColors: PaintColor[] = [
       b: 5.6
     },
     lrv: 66,
+    chroma: 6.4,
     undertone: {
       temperature: "warm",
       leansPrimary: "pink",
@@ -141,6 +143,7 @@ export const paintColors: PaintColor[] = [
       b: -0.8
     },
     lrv: 49,
+    chroma: 5.6,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -202,6 +205,7 @@ export const paintColors: PaintColor[] = [
       b: 14.9
     },
     lrv: 46,
+    chroma: 17.6,
     undertone: {
       temperature: "warm",
       leansPrimary: "pink",
@@ -263,6 +267,7 @@ export const paintColors: PaintColor[] = [
       b: -1.9
     },
     lrv: 26,
+    chroma: 11.4,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -324,6 +329,7 @@ export const paintColors: PaintColor[] = [
       b: 20
     },
     lrv: 22,
+    chroma: 30.4,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
@@ -385,6 +391,7 @@ export const paintColors: PaintColor[] = [
       b: 7.6
     },
     lrv: 56,
+    chroma: 7.7,
     undertone: {
       temperature: "warm",
       leansPrimary: "neutral",
@@ -446,6 +453,7 @@ export const paintColors: PaintColor[] = [
       b: 4.6
     },
     lrv: 85,
+    chroma: 4.7,
     undertone: {
       temperature: "warm",
       leansPrimary: "purple",
@@ -507,6 +515,7 @@ export const paintColors: PaintColor[] = [
       b: 6.3
     },
     lrv: 84,
+    chroma: 6.3,
     undertone: {
       temperature: "warm",
       leansPrimary: "pink",
@@ -568,6 +577,7 @@ export const paintColors: PaintColor[] = [
       b: -8.8
     },
     lrv: 23,
+    chroma: 9.3,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
@@ -629,6 +639,7 @@ export const paintColors: PaintColor[] = [
       b: 10.7
     },
     lrv: 10,
+    chroma: 33,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
@@ -690,6 +701,7 @@ export const paintColors: PaintColor[] = [
       b: 9.6
     },
     lrv: 38,
+    chroma: 9.6,
     undertone: {
       temperature: "warm",
       leansPrimary: "neutral",
@@ -751,6 +763,7 @@ export const paintColors: PaintColor[] = [
       b: 33.1
     },
     lrv: 52,
+    chroma: 34.1,
     undertone: {
       temperature: "warm",
       leansPrimary: "yellow",
@@ -812,6 +825,7 @@ export const paintColors: PaintColor[] = [
       b: 15.6
     },
     lrv: 34,
+    chroma: 16.9,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -873,13 +887,14 @@ export const paintColors: PaintColor[] = [
       b: -11.4
     },
     lrv: 5,
+    chroma: 13.5,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
       leansSecondary: "blue"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.8170588235294117,
     tags: [
       "moody",
@@ -934,6 +949,7 @@ export const paintColors: PaintColor[] = [
       b: -0.8
     },
     lrv: 14,
+    chroma: 4.8,
     undertone: {
       temperature: "cool",
       leansPrimary: "purple",
@@ -995,13 +1011,14 @@ export const paintColors: PaintColor[] = [
       b: 7.7
     },
     lrv: 7,
+    chroma: 9.9,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
       leansSecondary: "neutral"
     },
     stability: 0.6,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.8123529411764706,
     tags: [
       "moody",
@@ -1056,6 +1073,7 @@ export const paintColors: PaintColor[] = [
       b: 16.3
     },
     lrv: 28,
+    chroma: 17.8,
     undertone: {
       temperature: "warm",
       leansPrimary: "neutral",
@@ -1117,6 +1135,7 @@ export const paintColors: PaintColor[] = [
       b: 14.8
     },
     lrv: 22,
+    chroma: 16,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -1178,13 +1197,14 @@ export const paintColors: PaintColor[] = [
       b: -0.9
     },
     lrv: 8,
+    chroma: 1.1,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
       leansSecondary: "purple"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.8052941176470588,
     tags: [
       "moody",
@@ -1239,6 +1259,7 @@ export const paintColors: PaintColor[] = [
       b: -4.9
     },
     lrv: 40,
+    chroma: 5,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
@@ -1300,6 +1321,7 @@ export const paintColors: PaintColor[] = [
       b: -5.6
     },
     lrv: 54,
+    chroma: 6.5,
     undertone: {
       temperature: "cool",
       leansPrimary: "purple",
@@ -1361,6 +1383,7 @@ export const paintColors: PaintColor[] = [
       b: -3.1
     },
     lrv: 71,
+    chroma: 4.9,
     undertone: {
       temperature: "cool",
       leansPrimary: "purple",
@@ -1422,6 +1445,7 @@ export const paintColors: PaintColor[] = [
       b: -7.1
     },
     lrv: 38,
+    chroma: 7.3,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
@@ -1483,6 +1507,7 @@ export const paintColors: PaintColor[] = [
       b: -4.7
     },
     lrv: 57,
+    chroma: 5.1,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
@@ -1544,6 +1569,7 @@ export const paintColors: PaintColor[] = [
       b: -2.7
     },
     lrv: 63,
+    chroma: 6.7,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
@@ -1605,6 +1631,7 @@ export const paintColors: PaintColor[] = [
       b: -1.5
     },
     lrv: 61,
+    chroma: 4.6,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -1666,6 +1693,7 @@ export const paintColors: PaintColor[] = [
       b: -2.2
     },
     lrv: 57,
+    chroma: 9.9,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -1727,6 +1755,7 @@ export const paintColors: PaintColor[] = [
       b: 3.2
     },
     lrv: 39,
+    chroma: 6.8,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -1788,6 +1817,7 @@ export const paintColors: PaintColor[] = [
       b: 17.9
     },
     lrv: 36,
+    chroma: 26.9,
     undertone: {
       temperature: "warm",
       leansPrimary: "pink",
@@ -1849,6 +1879,7 @@ export const paintColors: PaintColor[] = [
       b: 19.4
     },
     lrv: 63,
+    chroma: 19.6,
     undertone: {
       temperature: "warm",
       leansPrimary: "yellow",
@@ -1910,6 +1941,7 @@ export const paintColors: PaintColor[] = [
       b: 17.4
     },
     lrv: 20,
+    chroma: 27.6,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
@@ -1971,13 +2003,14 @@ export const paintColors: PaintColor[] = [
       b: 10.4
     },
     lrv: 8,
+    chroma: 12.3,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
       leansSecondary: "neutral"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7747058823529411,
     tags: [
       "moody",
@@ -2032,13 +2065,14 @@ export const paintColors: PaintColor[] = [
       b: 9.5
     },
     lrv: 4,
+    chroma: 14.8,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
       leansSecondary: "neutral"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7723529411764706,
     tags: [
       "warm",
@@ -2093,13 +2127,14 @@ export const paintColors: PaintColor[] = [
       b: 23.4
     },
     lrv: 7,
+    chroma: 36.8,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
       leansSecondary: null
     },
     stability: 0.65,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.77,
     tags: [
       "warm",
@@ -2154,6 +2189,7 @@ export const paintColors: PaintColor[] = [
       b: 5.8
     },
     lrv: 13,
+    chroma: 5.8,
     undertone: {
       temperature: "neutral",
       leansPrimary: "neutral",
@@ -2214,6 +2250,7 @@ export const paintColors: PaintColor[] = [
       b: 32.5
     },
     lrv: 17,
+    chroma: 33.9,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -2275,13 +2312,14 @@ export const paintColors: PaintColor[] = [
       b: 8.9
     },
     lrv: 5,
+    chroma: 18.5,
     undertone: {
       temperature: "warm",
       leansPrimary: "purple",
       leansSecondary: "orange"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7629411764705882,
     tags: [
       "warm",
@@ -2336,6 +2374,7 @@ export const paintColors: PaintColor[] = [
       b: 10
     },
     lrv: 10,
+    chroma: 10,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -2397,13 +2436,14 @@ export const paintColors: PaintColor[] = [
       b: 1.2
     },
     lrv: 7,
+    chroma: 2.6,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
       leansSecondary: "neutral"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.758235294117647,
     tags: [
       "moody",
@@ -2458,13 +2498,14 @@ export const paintColors: PaintColor[] = [
       b: 4.1
     },
     lrv: 4,
+    chroma: 6.7,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
       leansSecondary: "neutral"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7558823529411764,
     tags: [
       "moody",
@@ -2519,13 +2560,14 @@ export const paintColors: PaintColor[] = [
       b: -4.5
     },
     lrv: 7,
+    chroma: 5.7,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
       leansSecondary: "blue"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7535294117647059,
     tags: [
       "warm",
@@ -2580,13 +2622,14 @@ export const paintColors: PaintColor[] = [
       b: -6.9
     },
     lrv: 7,
+    chroma: 6.9,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
       leansSecondary: "neutral"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7511764705882352,
     tags: [
       "cool",
@@ -2641,13 +2684,14 @@ export const paintColors: PaintColor[] = [
       b: -1.1
     },
     lrv: 6,
+    chroma: 6.2,
     undertone: {
       temperature: "warm",
       leansPrimary: "purple",
       leansSecondary: "orange"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7488235294117647,
     tags: [
       "moody",
@@ -2702,6 +2746,7 @@ export const paintColors: PaintColor[] = [
       b: 3
     },
     lrv: 90,
+    chroma: 3.1,
     undertone: {
       temperature: "warm",
       leansPrimary: "yellow",
@@ -2763,6 +2808,7 @@ export const paintColors: PaintColor[] = [
       b: 7.8
     },
     lrv: 21,
+    chroma: 8.8,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -2824,6 +2870,7 @@ export const paintColors: PaintColor[] = [
       b: -2.3
     },
     lrv: 56,
+    chroma: 5.4,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -2885,6 +2932,7 @@ export const paintColors: PaintColor[] = [
       b: 9.6
     },
     lrv: 16,
+    chroma: 9.8,
     undertone: {
       temperature: "warm",
       leansPrimary: "purple",
@@ -2946,13 +2994,14 @@ export const paintColors: PaintColor[] = [
       b: 10.3
     },
     lrv: 7,
+    chroma: 18.6,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
       leansSecondary: "neutral"
     },
     stability: 0.6,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7347058823529411,
     tags: [
       "warm",
@@ -3007,6 +3056,7 @@ export const paintColors: PaintColor[] = [
       b: 27.2
     },
     lrv: 62,
+    chroma: 28.3,
     undertone: {
       temperature: "warm",
       leansPrimary: "yellow",
@@ -3068,6 +3118,7 @@ export const paintColors: PaintColor[] = [
       b: 6.9
     },
     lrv: 72,
+    chroma: 7.9,
     undertone: {
       temperature: "warm",
       leansPrimary: "pink",
@@ -3129,6 +3180,7 @@ export const paintColors: PaintColor[] = [
       b: 24
     },
     lrv: 19,
+    chroma: 33.9,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
@@ -3190,6 +3242,7 @@ export const paintColors: PaintColor[] = [
       b: 9.4
     },
     lrv: 34,
+    chroma: 10,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -3251,6 +3304,7 @@ export const paintColors: PaintColor[] = [
       b: 6.2
     },
     lrv: 17,
+    chroma: 13,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
@@ -3312,6 +3366,7 @@ export const paintColors: PaintColor[] = [
       b: -2.8
     },
     lrv: 33,
+    chroma: 7.1,
     undertone: {
       temperature: "cool",
       leansPrimary: "blue",
@@ -3373,6 +3428,7 @@ export const paintColors: PaintColor[] = [
       b: 11.3
     },
     lrv: 16,
+    chroma: 11.4,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -3434,13 +3490,14 @@ export const paintColors: PaintColor[] = [
       b: 3.4
     },
     lrv: 8,
+    chroma: 4,
     undertone: {
       temperature: "warm",
       leansPrimary: "purple",
       leansSecondary: "neutral"
     },
     stability: 0.5,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7158823529411764,
     tags: [
       "moody",
@@ -3495,6 +3552,7 @@ export const paintColors: PaintColor[] = [
       b: 8.3
     },
     lrv: 72,
+    chroma: 8.5,
     undertone: {
       temperature: "warm",
       leansPrimary: "pink",
@@ -3556,6 +3614,7 @@ export const paintColors: PaintColor[] = [
       b: 3.4
     },
     lrv: 43,
+    chroma: 6.2,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
@@ -3617,13 +3676,14 @@ export const paintColors: PaintColor[] = [
       b: -4.2
     },
     lrv: 9,
+    chroma: 6.2,
     undertone: {
       temperature: "cool",
       leansPrimary: "green",
       leansSecondary: "blue"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.7088235294117646,
     tags: [
       "cool",
@@ -3678,6 +3738,7 @@ export const paintColors: PaintColor[] = [
       b: 13.4
     },
     lrv: 17,
+    chroma: 25.4,
     undertone: {
       temperature: "warm",
       leansPrimary: "orange",
@@ -3739,6 +3800,7 @@ export const paintColors: PaintColor[] = [
       b: 18.7
     },
     lrv: 37,
+    chroma: 19.1,
     undertone: {
       temperature: "warm",
       leansPrimary: "yellow",
@@ -3800,6 +3862,7 @@ export const paintColors: PaintColor[] = [
       b: 4.5
     },
     lrv: 50,
+    chroma: 7.6,
     undertone: {
       temperature: "cool",
       leansPrimary: "purple",
@@ -3861,6 +3924,7 @@ export const paintColors: PaintColor[] = [
       b: 5.2
     },
     lrv: 82,
+    chroma: 5.2,
     undertone: {
       temperature: "warm",
       leansPrimary: "green",
@@ -3922,6 +3986,7 @@ export const paintColors: PaintColor[] = [
       b: 14.2
     },
     lrv: 46,
+    chroma: 14.3,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -3982,6 +4047,7 @@ export const paintColors: PaintColor[] = [
       b: 13.6
     },
     lrv: 81,
+    chroma: 13.7,
     undertone: {
       temperature: "neutral",
       leansPrimary: "yellow",
@@ -4042,6 +4108,7 @@ export const paintColors: PaintColor[] = [
       b: 23.8
     },
     lrv: 79,
+    chroma: 23.9,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -4102,6 +4169,7 @@ export const paintColors: PaintColor[] = [
       b: 9.5
     },
     lrv: 70,
+    chroma: 9.5,
     undertone: {
       temperature: "neutral",
       leansPrimary: "neutral",
@@ -4162,6 +4230,7 @@ export const paintColors: PaintColor[] = [
       b: 7.1
     },
     lrv: 26,
+    chroma: 7.2,
     undertone: {
       temperature: "neutral",
       leansPrimary: "neutral",
@@ -4222,6 +4291,7 @@ export const paintColors: PaintColor[] = [
       b: 8.8
     },
     lrv: 12,
+    chroma: 18.8,
     undertone: {
       temperature: "neutral",
       leansPrimary: "orange",
@@ -4282,6 +4352,7 @@ export const paintColors: PaintColor[] = [
       b: 15
     },
     lrv: 20,
+    chroma: 21.4,
     undertone: {
       temperature: "neutral",
       leansPrimary: "orange",
@@ -4342,6 +4413,7 @@ export const paintColors: PaintColor[] = [
       b: -5
     },
     lrv: 20,
+    chroma: 10.6,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -4402,6 +4474,7 @@ export const paintColors: PaintColor[] = [
       b: -4.4
     },
     lrv: 48,
+    chroma: 12.2,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -4462,6 +4535,7 @@ export const paintColors: PaintColor[] = [
       b: 9.4
     },
     lrv: 16,
+    chroma: 10.3,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -4522,6 +4596,7 @@ export const paintColors: PaintColor[] = [
       b: 12.3
     },
     lrv: 14,
+    chroma: 15.8,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -4582,13 +4657,14 @@ export const paintColors: PaintColor[] = [
       b: -12
     },
     lrv: 9,
+    chroma: 14,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
       leansSecondary: "blue"
     },
     stability: 0.55,
-    depthCategory: "dark",
+    depthCategory: "very_deep",
     popularity: 0.6711764705882353,
     tags: [
       "cool",
@@ -4642,6 +4718,7 @@ export const paintColors: PaintColor[] = [
       b: 28.2
     },
     lrv: 26,
+    chroma: 29.7,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -4702,6 +4779,7 @@ export const paintColors: PaintColor[] = [
       b: -3.1
     },
     lrv: 48,
+    chroma: 3.2,
     undertone: {
       temperature: "neutral",
       leansPrimary: "purple",
@@ -4762,6 +4840,7 @@ export const paintColors: PaintColor[] = [
       b: -8.9
     },
     lrv: 66,
+    chroma: 9.5,
     undertone: {
       temperature: "neutral",
       leansPrimary: "blue",
@@ -4822,6 +4901,7 @@ export const paintColors: PaintColor[] = [
       b: 9.7
     },
     lrv: 65,
+    chroma: 11.1,
     undertone: {
       temperature: "neutral",
       leansPrimary: "pink",
@@ -4882,6 +4962,7 @@ export const paintColors: PaintColor[] = [
       b: 8.8
     },
     lrv: 68,
+    chroma: 12.5,
     undertone: {
       temperature: "neutral",
       leansPrimary: "pink",
@@ -4942,6 +5023,7 @@ export const paintColors: PaintColor[] = [
       b: 7.5
     },
     lrv: 15,
+    chroma: 8.1,
     undertone: {
       temperature: "neutral",
       leansPrimary: "green",
@@ -5002,6 +5084,7 @@ export const paintColors: PaintColor[] = [
       b: 32.4
     },
     lrv: 65,
+    chroma: 32.4,
     undertone: {
       temperature: "neutral",
       leansPrimary: "yellow",
