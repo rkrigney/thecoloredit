@@ -140,6 +140,12 @@ export default function RoomSetup() {
   const [showIllustration, setShowIllustration] = useState(false)
   const [illustrationReady, setIllustrationReady] = useState(false)
 
+  // Preload illustration images on component mount
+  useEffect(() => {
+    const img = new Image()
+    img.src = warmAndCozyIllustration
+  }, [])
+
   // Reset illustration state when step changes
   useEffect(() => {
     setShowIllustration(false)
@@ -364,7 +370,7 @@ export default function RoomSetup() {
 
               {/* Warm & Cozy Illustration - pops in when that option is selected */}
               {step.id === 'bulbFeel' && showIllustration && (
-                <div className="mt-6 animate-pop-in">
+                <div className="mt-6 animate-pop-in flex justify-center">
                   <img
                     src={warmAndCozyIllustration}
                     alt="Warm and cozy lighting illustration"
