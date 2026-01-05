@@ -101,8 +101,12 @@ const steps: Step[] = [
     options: [
       { label: 'Sherwin-Williams', value: 'sw' },
       { label: 'Benjamin Moore', value: 'bm' },
-      { label: 'Behr', value: 'behr' },
-      { label: 'PPG', value: 'ppg' },
+      { label: 'BEHR', value: 'behr' },
+      { label: 'Valspar', value: 'valspar' },
+      { label: 'Glidden', value: 'glidden' },
+      { label: 'Dunn-Edwards', value: 'de' },
+      { label: 'Farrow & Ball', value: 'fb' },
+      { label: 'HGTV Home', value: 'hgtv' },
       { label: 'Any brand', value: 'any' }
     ]
   },
