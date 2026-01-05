@@ -7,10 +7,10 @@ import { generateRoomVisualization, getCacheKey, getCachedVisualization, cacheVi
 import LightingSlider from '../components/LightingSlider'
 import SaveShortlistButton from '../components/SaveShortlistButton'
 
-const tagLabels: Record<string, { label: string; bg: string; text: string }> = {
-  top_pick: { label: 'Top Pick', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  safe_bet: { label: 'Safe Bet', bg: 'bg-sky-50', text: 'text-sky-700' },
-  bold_choice: { label: 'Bold Choice', bg: 'bg-amber-50', text: 'text-amber-700' }
+const tagLabels: Record<string, { label: string; bg: string; text: string; border: string }> = {
+  top_pick: { label: 'Top Pick', bg: 'bg-sage-50', text: 'text-sage', border: 'border-sage/20' },
+  safe_bet: { label: 'Safe Bet', bg: 'bg-cream-100', text: 'text-charcoal-light', border: 'border-cream-300' },
+  bold_choice: { label: 'Bold Choice', bg: 'bg-blush-light/50', text: 'text-blush-dark', border: 'border-blush/20' }
 }
 
 function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCompare: () => void; roomImage: string | null }) {
@@ -68,7 +68,7 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
         <div className="relative">
           <LightingSlider imageUrl={visualizedImage} colorName={color.name} />
           {/* Tag badge */}
-          <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium ${tagInfo.bg} ${tagInfo.text} z-10`}>
+          <div className={`absolute top-3 left-3 px-3 py-1.5 text-xs font-medium tracking-wide border ${tagInfo.bg} ${tagInfo.text} ${tagInfo.border} z-10`}>
             {tagInfo.label}
           </div>
           {/* Toggle button */}
@@ -122,7 +122,7 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
         )}
 
         {/* Tag badge - shown when no visualization */}
-        <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-medium ${tagInfo.bg} ${tagInfo.text}`}>
+        <div className={`absolute top-3 left-3 px-3 py-1.5 text-xs font-medium tracking-wide border ${tagInfo.bg} ${tagInfo.text} ${tagInfo.border}`}>
           {tagInfo.label}
         </div>
         </div>
@@ -161,9 +161,9 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
 
         {/* Confidence */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 h-1.5 bg-charcoal/10 rounded-full overflow-hidden">
+          <div className="flex-1 h-1 bg-cream-200 overflow-hidden">
             <div
-              className="h-full bg-gold rounded-full transition-all"
+              className="h-full bg-sage transition-all"
               style={{ width: `${scores.overall}%` }}
             />
           </div>
@@ -171,7 +171,7 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
         </div>
 
         {/* Reasoning */}
-        <p className="text-sm text-charcoal italic mb-4">
+        <p className="text-sm text-editorial mb-4">
           "{reasoning}"
         </p>
 
@@ -207,7 +207,7 @@ function ColorCard({ scored, onCompare, roomImage }: { scored: ScoredColor; onCo
       {/* View full story link */}
       <button
         onClick={() => navigate(`/color/${color.id}`)}
-        className="w-full py-3 border-t border-charcoal/5 text-sm text-charcoal-light hover:text-charcoal hover:bg-cream-100 transition-colors flex items-center justify-center gap-2"
+        className="w-full py-4 border-t border-cream-200 text-sm text-charcoal-light hover:text-sage hover:bg-sage-50 transition-colors flex items-center justify-center gap-2"
       >
         View paint story
         <ArrowRight className="w-4 h-4" />
@@ -262,7 +262,7 @@ export default function Shortlist() {
   return (
     <div className="min-h-screen bg-cream-50 pb-24">
       {/* Header */}
-      <header className="px-4 py-4 border-b border-charcoal/5">
+      <header className="page-header">
         <div className="flex items-center justify-between">
           <button
             onClick={() => navigate('/setup')}
@@ -271,25 +271,25 @@ export default function Shortlist() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="text-center">
-            <h1 className="font-serif text-lg text-charcoal">Your Shortlist</h1>
-            <p className="text-xs text-charcoal-light">{profile.roomType ? roomTypeLabels[profile.roomType] : 'Your space'}</p>
+            <h1 className="font-serif text-title text-charcoal">Your Shortlist</h1>
+            <p className="text-xs text-charcoal-lighter tracking-wide">{profile.roomType ? roomTypeLabels[profile.roomType] : 'Your space'}</p>
           </div>
           <SaveShortlistButton shortlist={shortlist} profile={profile} />
         </div>
       </header>
 
       {/* Disclaimer */}
-      <div className="px-4 py-3 bg-cream-100 text-center">
-        <p className="text-xs text-charcoal-light">
+      <div className="px-6 py-4 bg-cream-100 text-center border-b border-cream-200">
+        <p className="text-xs text-charcoal-light font-serif italic">
           Digital swatches are a starting point. Always test with real samples.
         </p>
       </div>
 
       {/* Room image indicator */}
       {roomImage && (
-        <div className="px-4 py-3 bg-emerald-50 text-center">
-          <p className="text-xs text-emerald-700">
-            ✨ AI is visualizing each color on your room photo
+        <div className="px-6 py-3 bg-sage-50 text-center border-b border-sage/20">
+          <p className="text-xs text-sage">
+            AI is visualizing each color on your room photo
           </p>
         </div>
       )}
@@ -308,8 +308,8 @@ export default function Shortlist() {
 
       {/* Compare selection indicator */}
       {compareCount > 0 && (
-        <div className="fixed bottom-20 left-4 right-4 bg-charcoal text-cream-50 rounded-full py-3 px-4 flex items-center justify-between shadow-lg">
-          <span className="text-sm">
+        <div className="fixed bottom-20 left-6 right-6 bg-sage text-cream-50 py-4 px-5 flex items-center justify-between shadow-lg">
+          <span className="text-sm font-medium">
             {compareCount}/2 colors selected
           </span>
           {compareCount === 2 ? (
@@ -332,7 +332,7 @@ export default function Shortlist() {
       )}
 
       {/* Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-cream-50 border-t border-charcoal/10 px-4 py-3 safe-area-inset-bottom">
+      <div className="fixed bottom-0 left-0 right-0 bg-cream-50 border-t border-cream-200 px-6 py-4 safe-area-inset-bottom">
         <div className="flex gap-3">
           <button
             onClick={() => navigate('/sampling-plan')}

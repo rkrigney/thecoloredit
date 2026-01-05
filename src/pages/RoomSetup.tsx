@@ -119,9 +119,9 @@ function SunSlider({ value, onChange }: { value: number; onChange: (v: number) =
   const rayCount = Math.floor(value / 15) + 2 // More rays as it gets brighter
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Sun animation container */}
-      <div className="relative h-40 bg-gradient-to-b from-slate-800 to-slate-600 rounded-2xl overflow-hidden transition-all duration-300"
+      <div className="relative h-44 overflow-hidden transition-all duration-300"
            style={{
              background: `linear-gradient(to bottom,
                hsl(${200 + value * 0.3}, ${20 + value * 0.5}%, ${15 + value * 0.6}%) 0%,
@@ -177,10 +177,10 @@ function SunSlider({ value, onChange }: { value: number; onChange: (v: number) =
       </div>
 
       {/* Slider */}
-      <div>
-        <div className="flex justify-between text-sm text-charcoal-light mb-3">
-          <span>None</span>
-          <span>Lots</span>
+      <div className="px-2">
+        <div className="flex justify-between text-sm text-charcoal-light mb-4">
+          <span className="font-serif italic">None</span>
+          <span className="font-serif italic">Lots</span>
         </div>
         <input
           type="range"
@@ -188,16 +188,18 @@ function SunSlider({ value, onChange }: { value: number; onChange: (v: number) =
           max="100"
           value={value}
           onChange={(e) => onChange(Number(e.target.value))}
-          className="w-full h-2 bg-charcoal/10 rounded-full appearance-none cursor-pointer
+          className="w-full h-1.5 bg-cream-300 rounded-full appearance-none cursor-pointer
                    [&::-webkit-slider-thumb]:appearance-none
                    [&::-webkit-slider-thumb]:w-6
                    [&::-webkit-slider-thumb]:h-6
                    [&::-webkit-slider-thumb]:rounded-full
-                   [&::-webkit-slider-thumb]:bg-gold
+                   [&::-webkit-slider-thumb]:bg-sage
                    [&::-webkit-slider-thumb]:shadow-md
                    [&::-webkit-slider-thumb]:cursor-pointer
                    [&::-webkit-slider-thumb]:border-2
-                   [&::-webkit-slider-thumb]:border-white"
+                   [&::-webkit-slider-thumb]:border-white
+                   [&::-webkit-slider-thumb]:transition-transform
+                   [&::-webkit-slider-thumb]:hover:scale-110"
         />
       </div>
     </div>
@@ -315,7 +317,7 @@ export default function RoomSetup() {
   return (
     <div className="min-h-screen bg-cream-50 flex flex-col">
       {/* Header */}
-      <header className="px-4 py-4 flex items-center justify-between">
+      <header className="px-6 py-5 flex items-center justify-between border-b border-cream-200">
         <button
           onClick={() => currentStep > 0 ? setCurrentStep(prev => prev - 1) : navigate('/')}
           className="p-2 -ml-2 text-charcoal-light hover:text-charcoal transition-colors"
@@ -324,16 +326,16 @@ export default function RoomSetup() {
         </button>
 
         {/* Progress dots */}
-        <div className="flex gap-1.5">
+        <div className="flex gap-2">
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`w-2 h-2 rounded-full transition-colors ${
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 i === currentStep
-                  ? 'bg-charcoal'
+                  ? 'bg-sage w-6'
                   : i < currentStep
-                  ? 'bg-gold'
-                  : 'bg-charcoal/20'
+                  ? 'bg-sage'
+                  : 'bg-cream-300'
               }`}
             />
           ))}
@@ -343,10 +345,10 @@ export default function RoomSetup() {
       </header>
 
       {/* Content */}
-      <div className="px-6 pt-4 pb-4 flex-1 flex flex-col overflow-y-auto">
+      <div className="px-6 pt-8 pb-4 flex-1 flex flex-col overflow-y-auto">
         {/* Question */}
-        <div className="mb-6">
-          <h2 className="font-serif text-2xl text-charcoal mb-2">
+        <div className="mb-8">
+          <h2 className="font-serif text-title text-charcoal mb-2">
             {step.title}
           </h2>
           {step.subtitle && (
@@ -360,7 +362,7 @@ export default function RoomSetup() {
         <div className="mb-4 flex-1">
           {/* Image upload with room type */}
           {step.type === 'image_with_room' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -371,19 +373,19 @@ export default function RoomSetup() {
               />
 
               {!imagePreview ? (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <label
                     htmlFor="room-image-upload"
-                    className="flex flex-col items-center justify-center w-full h-40 border-2 border-dashed border-charcoal/20 rounded-2xl cursor-pointer hover:border-charcoal/40 hover:bg-cream-100 transition-colors"
+                    className="flex flex-col items-center justify-center w-full h-44 border border-cream-300 bg-white cursor-pointer hover:border-sage hover:bg-sage-50 transition-all"
                   >
-                    <Upload className="w-8 h-8 text-charcoal/40 mb-2" />
+                    <Upload className="w-8 h-8 text-charcoal-lighter mb-3" />
                     <span className="text-charcoal font-medium">Upload a photo</span>
-                    <span className="text-charcoal-light text-sm mt-1">or drag and drop</span>
+                    <span className="text-charcoal-lighter text-sm mt-1">or drag and drop</span>
                   </label>
 
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="w-full py-3 px-4 border border-charcoal/20 rounded-full flex items-center justify-center gap-2 text-charcoal hover:bg-cream-100 transition-colors"
+                    className="btn-secondary flex items-center justify-center gap-2"
                   >
                     <Camera className="w-5 h-5" />
                     Take a photo
@@ -394,7 +396,7 @@ export default function RoomSetup() {
                   <img
                     src={imagePreview}
                     alt="Room preview"
-                    className="w-full max-h-48 object-cover rounded-2xl"
+                    className="w-full max-h-52 object-cover"
                   />
                   <button
                     onClick={removeImage}
@@ -407,17 +409,13 @@ export default function RoomSetup() {
 
               {/* Room type question */}
               <div>
-                <p className="text-charcoal-light text-sm mb-3">What room are we working on? (optional)</p>
+                <p className="section-label mb-4">What room are we working on?</p>
                 <div className="flex flex-wrap gap-2">
                   {roomOptions.map(opt => (
                     <button
                       key={opt.value}
                       onClick={() => handleRoomSelect(opt.value)}
-                      className={`px-4 py-2 rounded-full text-sm transition-all ${
-                        answers.roomType === opt.value
-                          ? 'bg-charcoal text-white'
-                          : 'bg-charcoal/5 text-charcoal hover:bg-charcoal/10'
-                      }`}
+                      className={answers.roomType === opt.value ? 'btn-pill-selected' : 'btn-pill'}
                     >
                       {opt.label}
                     </button>
@@ -442,16 +440,16 @@ export default function RoomSetup() {
                 <button
                   key={opt.value}
                   onClick={() => handleSingleSelect(opt.value)}
-                  className={`w-full text-left p-4 rounded-xl transition-all ${
+                  className={`w-full text-left p-5 border transition-all ${
                     answers[step.id] === opt.value
-                      ? 'bg-charcoal text-white'
-                      : 'bg-charcoal/5 text-charcoal hover:bg-charcoal/10'
+                      ? 'bg-sage text-cream-50 border-sage'
+                      : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
                   }`}
                 >
                   <span className="font-medium">{opt.label}</span>
                   {opt.subtitle && (
-                    <span className={`block text-sm mt-0.5 ${
-                      answers[step.id] === opt.value ? 'text-white/70' : 'text-charcoal-light'
+                    <span className={`block text-sm mt-1 ${
+                      answers[step.id] === opt.value ? 'text-cream-50/80' : 'text-charcoal-light'
                     }`}>
                       {opt.subtitle}
                     </span>
@@ -474,20 +472,20 @@ export default function RoomSetup() {
                     key={opt.value}
                     onClick={() => handleAvoidSelect(opt.value)}
                     disabled={disabled}
-                    className={`w-full text-left p-4 rounded-xl transition-all flex items-center gap-3 ${
+                    className={`w-full text-left p-5 border transition-all flex items-center gap-4 ${
                       selected
-                        ? 'bg-charcoal text-white'
+                        ? 'bg-sage text-cream-50 border-sage'
                         : disabled
-                        ? 'bg-charcoal/5 text-charcoal/40 cursor-not-allowed'
-                        : 'bg-charcoal/5 text-charcoal hover:bg-charcoal/10'
+                        ? 'bg-cream-100 text-charcoal-lighter border-cream-200 cursor-not-allowed'
+                        : 'bg-white text-charcoal border-cream-200 hover:border-sage hover:bg-sage-50'
                     }`}
                   >
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all flex-shrink-0 ${
                       selected
-                        ? 'border-white bg-white'
+                        ? 'border-cream-50 bg-cream-50'
                         : 'border-charcoal/30'
                     }`}>
-                      {selected && <Check className="w-3 h-3 text-charcoal" />}
+                      {selected && <Check className="w-3 h-3 text-sage" />}
                     </div>
                     <span className="font-medium">{opt.label}</span>
                   </button>
@@ -499,12 +497,12 @@ export default function RoomSetup() {
       </div>
 
       {/* Bottom CTA */}
-      <div className="px-6 pb-6 pt-2 safe-area-inset-bottom">
+      <div className="px-6 pb-8 pt-4 safe-area-inset-bottom border-t border-cream-200 bg-cream-50">
         {isLastStep ? (
           <button
             onClick={handleGenerate}
             disabled={!canProceed() || isGenerating}
-            className="btn-primary flex items-center justify-center gap-3 disabled:opacity-50"
+            className="btn-primary w-full flex items-center justify-center gap-3 disabled:opacity-50"
           >
             {isGenerating ? (
               <>
@@ -521,7 +519,7 @@ export default function RoomSetup() {
         ) : (
           <button
             onClick={() => setCurrentStep(prev => prev + 1)}
-            className="btn-primary flex items-center justify-center gap-2"
+            className="btn-primary w-full flex items-center justify-center gap-2"
           >
             {step.type === 'image_with_room' && imagePreview ? 'Looks great!' : 'Continue'}
             <ArrowRight className="w-4 h-4" />
@@ -534,7 +532,7 @@ export default function RoomSetup() {
               setAnswers(prev => ({ ...prev, avoidList: [] }))
               handleGenerate()
             }}
-            className="mt-3 w-full py-2 text-sm text-charcoal-light hover:text-charcoal transition-colors"
+            className="btn-ghost w-full mt-3"
           >
             No concerns — let's see everything
           </button>
@@ -543,7 +541,7 @@ export default function RoomSetup() {
         {step.type === 'image_with_room' && !imagePreview && (
           <button
             onClick={() => setCurrentStep(prev => prev + 1)}
-            className="mt-3 w-full py-2 text-sm text-charcoal-light hover:text-charcoal transition-colors"
+            className="btn-ghost w-full mt-3"
           >
             Skip for now
           </button>
