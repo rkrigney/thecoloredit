@@ -12,7 +12,8 @@ import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCREENSHOT_DIR = join(__dirname, 'screenshots');
-const BASE_URL = 'https://rkrigney.github.io/thecoloredit';
+// Use local dev server or deployed URL (note trailing slash for Vite)
+const BASE_URL = process.env.TEST_URL || 'http://localhost:5173/thecoloredit/';
 
 const viewports = {
   mobile: { width: 375, height: 667 },      // iPhone SE
@@ -28,7 +29,10 @@ async function runTests() {
   console.log('🎨 Starting The Color Edit visual tests...\n');
   console.log(`📍 Testing: ${BASE_URL}\n`);
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    ...(process.env.CHROME_PATH && { executablePath: process.env.CHROME_PATH })
+  });
 
   try {
     for (const [name, viewport] of Object.entries(viewports)) {
