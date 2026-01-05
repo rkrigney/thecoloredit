@@ -115,7 +115,12 @@ function App() {
 
   useEffect(() => {
     if (roomImage) {
-      localStorage.setItem(STORAGE_KEYS.roomImage, JSON.stringify(roomImage))
+      try {
+        localStorage.setItem(STORAGE_KEYS.roomImage, JSON.stringify(roomImage))
+      } catch {
+        // Image too large for localStorage - that's okay, we'll just keep it in memory
+        console.warn('Room image too large for localStorage')
+      }
     }
   }, [roomImage])
 
